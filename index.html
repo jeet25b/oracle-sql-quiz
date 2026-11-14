@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle SQL & PL/SQL Mastery Quiz — Student & Faculty Portal</title>
+<style>
+  :root {
+    --primary: #1b365d;
+    --primary-light: #2c5282;
+    --accent: #006d77;
+    --accent-hover: #00565e;
+    --bg: #f4f7fa;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --warning: #d97706;
+    --warning-bg: #fef3c7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  body { background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+  
+  /* Header */
+  header { background: linear-gradient(135deg, var(--primary), #102a43); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .brand h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.3px; }
+  .brand p { font-size: 0.85rem; color: #cbd5e1; }
+  .nav-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  
+  /* Buttons */
+  .btn { padding: 0.55rem 1.1rem; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.25); }
+  .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
+  .btn-outline:hover { background: #f8fafc; border-color: var(--primary); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #15803d; }
+
+  /* Main Container */
+  main { max-width: 960px; width: 100%; margin: 2rem auto; padding: 0 1rem; flex: 1; }
+  .card { background: var(--card); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+  
+  /* Form Controls */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  input, select { padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.12); }
+
+  /* Quiz UI */
+  .quiz-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+  .badge { background: #e0f2fe; color: #0369a1; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; }
+  .badge-timer { background: var(--warning-bg); color: var(--warning); }
+  .progress-wrap { width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 1.5rem; }
+  .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+  .q-text { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.25rem; }
+  .options { display: flex; flex-direction: column; gap: 0.75rem; }
+  .option-btn { text-align: left; padding: 0.95rem 1.15rem; border: 2px solid var(--border); border-radius: 10px; background: #fff; font-size: 0.98rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 0.75rem; }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #f0fdfa; }
+  .option-btn.correct { border-color: var(--success); background: var(--success-bg); color: #14532d; font-weight: 600; }
+  .option-btn.wrong { border-color: var(--danger); background: var(--danger-bg); color: #7f1d1d; }
+  .opt-letter { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .explanation { margin-top: 1.25rem; padding: 1rem; border-radius: 8px; background: #f8fafc; border-left: 4px solid var(--accent); font-size: 0.93rem; display: none; }
+  .quiz-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* Results & Faculty Dashboard */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+  .stat-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat-val { font-size: 1.65rem; font-weight: 800; color: var(--primary); }
+  .stat-lbl { font-size: 0.82rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+  th, td { padding: 0.75rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #f1f5f9; color: var(--primary); font-weight: 700; }
+  tr:hover { background: #f8fafc; }
+  .grade-pill { padding: 0.25rem 0.65rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+  .grade-A { background: var(--success-bg); color: var(--success); }
+  .grade-B { background: #e0f2fe; color: #0369a1; }
+  .grade-C { background: var(--warning-bg); color: var(--warning); }
+  .grade-F { background: var(--danger-bg); color: var(--danger); }
+
+  .hidden { display: none !important; }
+  .alert { padding: 0.85rem 1rem; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.9rem; margin-bottom: 1rem; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+  .modal { background: #fff; border-radius: 12px; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Oracle SQL &amp; PL/SQL Assessment Portal</h1>
+    <p>Modules 1–9 Conceptual &amp; Interview MCQ Test with Student-Wise Grading</p>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-secondary" onclick="showView('student-setup')">Student Quiz</button>
+    <button class="btn btn-secondary" onclick="showView('faculty-dashboard')">Faculty Results (<span id="record-count">0</span>)</button>
+    <button class="btn btn-primary" onclick="copyShareLink()">Share Link</button>
+  </div>
+</header>
+
+<main>
+  <!-- VIEW 1: STUDENT SETUP -->
+  <section id="view-student-setup" class="card">
+    <h2 style="color: var(--primary); margin-bottom: 0.4rem;">Student Registration &amp; Test Setup</h2>
+    <p style="color: var(--muted); font-size: 0.95rem;">Enter your details below to begin. Your score, grade, and question-by-question breakdown will be recorded automatically.</p>
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="stu-name">Student Full Name *</label>
+        <input type="text" id="stu-name" placeholder="e.g., Rahul Sharma" required>
+      </div>
+      <div class="form-group">
+        <label for="stu-roll">Enrollment / Roll No. *</label>
+        <input type="text" id="stu-roll" placeholder="e.g., CS2026014" required>
+      </div>
+      <div class="form-group">
+        <label for="stu-batch">Batch / Section</label>
+        <input type="text" id="stu-batch" placeholder="e.g., BCA / B.Tech Sem-4">
+      </div>
+      <div class="form-group">
+        <label for="mod-filter">Syllabus Module</label>
+        <select id="mod-filter">
+          <option value="ALL">All Modules (25 Questions)</option>
+          <option value="M1">Module 1: DBMS &amp; SQL Basics</option>
+          <option value="M2">Module 2: Oracle Data Types</option>
+          <option value="M3">Module 3: Integrity &amp; Key Constraints</option>
+          <option value="M4">Module 4: DDL Commands</option>
+          <option value="M5">Module 5: DML &amp; Variables</option>
+          <option value="M6">Module 6: DQL, DUAL &amp; Aggregates</option>
+          <option value="M7">Module 7: Subqueries</option>
+          <option value="M8">Module 8: Joins &amp; USING Clause</option>
+          <option value="M9">Module 9: Triggers, Cursors &amp; Assertions</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="timer-mode">Time Limit</label>
+        <select id="timer-mode">
+          <option value="0">Untimed Practice Mode</option>
+          <option value="15">15 Minutes (Exam Mode)</option>
+          <option value="25">25 Minutes (Standard Test)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
+      <button class="btn btn-primary" onclick="startQuiz()">Start Assessment</button>
+      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">View Student-Wise Results</button>
+    </div>
+  </section>
+
+  <!-- VIEW 2: ACTIVE QUIZ -->
+  <section id="view-quiz" class="card hidden">
+    <div class="quiz-meta">
+      <div>
+        <span class="badge" id="q-module-badge">Module 1</span>
+        <span style="font-size: 0.88rem; color: var(--muted); margin-left: 0.5rem;" id="q-student-label"></span>
+      </div>
+      <div style="display: flex; gap: 0.6rem; align-items: center;">
+        <span class="badge badge-timer hidden" id="timer-display">25:00</span>
+        <span style="font-weight: 700; color: var(--primary);" id="q-counter">Question 1 of 25</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+
+    <div class="q-text" id="q-text">Question text goes here</div>
+    <div class="options" id="options-container"></div>
+    <div class="explanation" id="explanation-box"></div>
+
+    <div class="quiz-footer">
+      <span style="font-size: 0.9rem; font-weight: 600; color: var(--muted);">Current Score: <strong id="live-score" style="color: var(--primary);">0</strong></span>
+      <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next Question &rarr;</button>
+    </div>
+  </section>
+
+  <!-- VIEW 3: INDIVIDUAL STUDENT RESULT -->
+  <section id="view-result" class="card hidden">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="color: var(--primary);">Assessment Scorecard</h2>
+        <p id="res-student-info" style="color: var(--muted); font-weight: 600;"></p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-success" onclick="copyResultCode()">Copy Result Code for Teacher</button>
+        <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val" id="res-score">0/25</div><div class="stat-lbl">Marks Scored</div></div>
+      <div class="stat-box"><div class="stat-val" id="res-pct">0%</div><div class="stat-lbl">Percentage</div></div>
+      <div class="stat-box"><div class="stat-val" id="res-grade">A</div><div class="stat-lbl">Grade</div></div>
+      <div class="stat-box"><div class="stat-val" id="res-time">0m 0s</div><div class="stat-lbl">Time Taken</div></div>
+    </div>
+
+    <div class="alert">
+      <strong>Submission Note:</strong> Your result has been saved to this browser's Faculty Results table. If you are taking this test on your own device and need to submit your score to your teacher, click <strong>"Copy Result Code for Teacher"</strong> above and send the code via WhatsApp/Email so they can import it into their Student-Wise Result Dashboard.
+    </div>
+
+    <h3 style="color: var(--primary); margin: 1.25rem 0 0.5rem;">Question-by-Question Review</h3>
+    <div id="res-breakdown"></div>
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <button class="btn btn-primary" onclick="showView('student-setup')">Take Another Attempt</button>
+      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Open Student-Wise Result Table</button>
+    </div>
+  </section>
+
+  <!-- VIEW 4: FACULTY STUDENT-WISE RESULTS DASHBOARD -->
+  <section id="view-faculty-dashboard" class="card hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+      <div>
+        <h2 style="color: var(--primary);">Student-Wise MCQ Results</h2>
+        <p style="color: var(--muted); font-size: 0.9rem;">View, filter, import remote student result codes, or export all student scores to Excel (CSV).</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="toggleImportBox()">+ Import Student Result Code</button>
+        <button class="btn btn-success" onclick="exportCSV()">Export CSV (Excel)</button>
+        <button class="btn btn-danger" onclick="clearAllResults()">Clear Records</button>
+      </div>
+    </div>
+
+    <!-- Import Box for Remote Submissions -->
+    <div id="import-box" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
+      <label for="import-code-input">Paste Student Result Code(s) below (one per line):</label>
+      <textarea id="import-code-input" rows="3" style="width: 100%; margin: 0.5rem 0; padding: 0.6rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: monospace;" placeholder="Paste code(s) copied by students..."></textarea>
+      <button class="btn btn-primary" onclick="importStudentCodes()">Add to Result Table</button>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="form-grid" style="margin-top: 0.5rem;">
+      <div class="form-group">
+        <input type="text" id="search-student" placeholder="Search by Student Name, Roll No., or Batch..." oninput="renderFacultyTable()">
+      </div>
+      <div class="form-group">
+        <select id="filter-grade" onchange="renderFacultyTable()">
+          <option value="ALL">All Grades</option>
+          <option value="A+">Grade A+ (90%+)</option>
+          <option value="A">Grade A (75% - 89%)</option>
+          <option value="B">Grade B (60% - 74%)</option>
+          <option value="C">Grade C (40% - 59%)</option>
+          <option value="F">Grade F (&lt; 40%)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val" id="dash-total">0</div><div class="stat-lbl">Total Students</div></div>
+      <div class="stat-box"><div class="stat-val" id="dash-avg">0%</div><div class="stat-lbl">Class Average</div></div>
+      <div class="stat-box"><div class="stat-val" id="dash-high">0%</div><div class="stat-lbl">Highest Score</div></div>
+      <div class="stat-box"><div class="stat-val" id="dash-pass">0%</div><div class="stat-lbl">Pass Rate (&ge;40%)</div></div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Roll No.</th>
+            <th>Student Name</th>
+            <th>Batch</th>
+            <th>Module</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+            <th>Date &amp; Time</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="faculty-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Modal for Inspecting Individual Student Answer Sheet -->
+<div id="detail-modal" class="modal-backdrop hidden" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+      <h3 id="modal-title" style="color: var(--primary);">Student Answer Sheet</h3>
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { id: 1, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "Which of the following represents the correct logical execution order of clauses in Oracle SQL?", opts: ["SELECT -> FROM -> WHERE -> GROUP BY -> HAVING -> ORDER BY", "FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY", "FROM -> GROUP BY -> WHERE -> HAVING -> SELECT -> ORDER BY", "SELECT -> WHERE -> FROM -> GROUP BY -> HAVING -> ORDER BY"], ans: 1, exp: "While we write SELECT first, Oracle logically executes FROM first, followed by WHERE, GROUP BY, HAVING, SELECT, and finally ORDER BY." },
+  { id: 2, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "What is the maximum character length allowed for unquoted table or column identifiers in Oracle 12.2 and later?", opts: ["30 characters", "64 characters", "128 characters", "255 characters"], ans: 2, exp: "Oracle increased the maximum identifier length from 30 characters (pre-12.2) to 128 characters in Oracle 12.2 and later." },
+  { id: 3, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "Why does the condition 'WHERE salary = NULL' fail to return rows with missing salaries in Oracle?", opts: ["NULL is treated as 0 in numeric columns", "NULL is not equal to anything, not even another NULL", "NULL requires single quotes ('NULL')", "= NULL is only valid in PL/SQL"], ans: 1, exp: "In Oracle SQL, NULL represents an unknown/missing value and cannot be compared with '=' or '!='; you must use IS NULL or IS NOT NULL." },
+  { id: 4, mod: "M2", modName: "Module 2: Oracle Data Types", q: "How do CHAR(10) and VARCHAR2(10) differ when storing the 4-character string 'AJAY'?", opts: ["Both store 4 bytes without padding", "CHAR(10) pads with 6 trailing spaces; VARCHAR2(10) uses 4 bytes", "VARCHAR2(10) pads with spaces; CHAR(10) truncates", "CHAR(10) allows up to 4000 bytes; VARCHAR2(10) allows 2000 bytes"], ans: 1, exp: "CHAR right-pads shorter strings with spaces to its fixed length (up to 2000 bytes), whereas VARCHAR2 stores variable lengths (up to 4000 bytes) without padding." },
+  { id: 5, mod: "M2", modName: "Module 2: Oracle Data Types", q: "How does Oracle internally store an INTEGER column, and what value is stored if 12.5 is inserted?", opts: ["BINARY_INTEGER; stores 12", "NUMBER(38, 0); rounds to 13", "NUMBER(10, 2); stores 12.50", "Raises an ORA-01722 invalid number error"], ans: 1, exp: "Oracle converts ANSI INTEGER to NUMBER(38, 0) and rounds fractional values (12.5 rounds to 13)." },
+  { id: 6, mod: "M2", modName: "Module 2: Oracle Data Types", q: "What is the fixed storage size of Oracle's DATE data type and what components does it store?", opts: ["4 bytes; Year, Month, Day only", "7 bytes; Century, Year, Month, Day, Hour, Minute, Second", "8 bytes; Date, Time, and Time Zone", "11 bytes; Date, Time, and Fractional Seconds"], ans: 1, exp: "Oracle DATE uses a fixed 7-byte format storing Century, Year, Month, Day, Hour, Minute, and Second." },
+  { id: 7, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "Which two constraints in Oracle can ONLY be defined at the column level and never at the table level?", opts: ["PRIMARY KEY and UNIQUE", "NOT NULL and DEFAULT", "CHECK and FOREIGN KEY", "UNIQUE and CHECK"], ans: 1, exp: "NOT NULL and DEFAULT are strictly column-level specifications; PRIMARY KEY, UNIQUE, FOREIGN KEY, and CHECK can be declared at either level." },
+  { id: 8, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "How does Oracle Database treat NULL values in a column with a UNIQUE constraint?", opts: ["Rejects all NULL values", "Allows at most one NULL value", "Allows multiple NULL values", "Converts NULL to an empty string"], ans: 2, exp: "Because Oracle never considers one NULL equal to another NULL, multiple NULL values are permitted in a UNIQUE column." },
+  { id: 9, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "In Oracle's USER_CONSTRAINTS view, what constraint type is indicated by the letter 'R'?", opts: ["Read-Only Constraint", "Row-Level Check", "Foreign Key (Referential Integrity)", "Primary Key"], ans: 2, exp: "In USER_CONSTRAINTS, P = Primary Key, U = Unique, R = Foreign Key (Referential), and C = Check / Not Null." },
+  { id: 10, mod: "M4", modName: "Module 4: DDL Commands", q: "Which statement accurately distinguishes TRUNCATE from DELETE in Oracle?", opts: ["TRUNCATE can be rolled back; DELETE cannot", "TRUNCATE is DDL, releases storage space, and auto-commits", "DELETE releases storage space back to the tablespace", "TRUNCATE fires row-level DELETE triggers"], ans: 1, exp: "TRUNCATE is a DDL command that removes all rows rapidly, deallocates storage space, and issues an implicit COMMIT." },
+  { id: 11, mod: "M4", modName: "Module 4: DDL Commands", q: "Which of the following database objects CANNOT be directly renamed using the Oracle RENAME statement?", opts: ["Table", "View", "Sequence", "Trigger or Stored Procedure"], ans: 3, exp: "RENAME works on tables, views, sequences, synonyms, and private database links, but procedures, functions, packages, and triggers must be recreated." },
+  { id: 12, mod: "M4", modName: "Module 4: DDL Commands", q: "What does the NOVALIDATE option do when enabling or adding a constraint via ALTER TABLE?", opts: ["Disables the constraint permanently", "Enforces the constraint on future DML without checking existing rows", "Deletes existing rows that violate the constraint", "Drops dependent foreign keys automatically"], ans: 1, exp: "ENABLE NOVALIDATE activates the rule for new/updated rows immediately without scanning or failing on pre-existing data." },
+  { id: 13, mod: "M5", modName: "Module 5: DML & Variables", q: "Why does Oracle never guarantee the display order of rows from 'SELECT * FROM employee' without an ORDER BY clause?", opts: ["Oracle sorts rows alphabetically by primary key automatically", "Oracle stores rows in an unordered heap and reuses space from deleted rows", "SELECT * randomizes output for security", "Rows are ordered by column size"], ans: 1, exp: "Oracle uses an unordered heap structure and fills gaps left by deleted records, so ORDER BY is mandatory for guaranteed sorting." },
+  { id: 14, mod: "M5", modName: "Module 5: DML & Variables", q: "What is the difference between '&var' and ':var' in Oracle environments?", opts: ["&var is a SQL*Plus substitution variable; :var is a bind variable", "&var is for numbers; :var is only for strings", ":var is used in SQL*Plus; &var is used in PL/SQL triggers", "Both are identical DDL commands"], ans: 0, exp: "Ampersand (&) denotes a SQL*Plus substitution variable, whereas colon (:) denotes a bind variable used in Oracle Live SQL and SQL Developer." },
+  { id: 15, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "Which statement accurately describes Oracle's built-in DUAL table?", opts: ["It has two columns and zero rows", "It has one VARCHAR2(1) column named DUMMY with one row containing 'X'", "It stores all user table metadata", "It is a temporary table created per session"], ans: 1, exp: "DUAL contains a single column DUMMY VARCHAR2(1) and a single row 'X', used for evaluating expressions and functions." },
+  { id: 16, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "How do Oracle aggregate functions (SUM, AVG, MIN, MAX, COUNT) handle NULL values?", opts: ["All aggregate functions treat NULL as 0", "All ignore NULL values except COUNT(*), which counts all rows", "All return NULL if any row in the column is NULL", "COUNT(column_name) includes NULLs while COUNT(*) ignores them"], ans: 1, exp: "Aggregate functions ignore NULLs in column arguments, whereas COUNT(*) counts every row regardless of NULLs." },
+  { id: 17, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "What is the key difference between the WHERE clause and the HAVING clause?", opts: ["WHERE can use aggregate functions; HAVING cannot", "WHERE filters rows before grouping; HAVING filters groups after GROUP BY", "HAVING executes before FROM", "There is no difference; they are synonyms"], ans: 1, exp: "WHERE filters individual rows prior to GROUP BY; HAVING filters grouped rows after aggregate functions are evaluated." },
+  { id: 18, mod: "M7", modName: "Module 7: Subqueries", q: "What is the maximum number of nested subquery levels allowed in a WHERE clause in Oracle?", opts: ["32 levels", "64 levels", "128 levels", "255 levels"], ans: 3, exp: "Oracle allows up to 255 levels of nested subqueries inside a WHERE clause." },
+  { id: 19, mod: "M7", modName: "Module 7: Subqueries", q: "What happens if a subquery used with the '=' operator returns more than one row?", opts: ["Oracle compares against the first row only", "Oracle raises a single-row subquery returns more than one row error", "Oracle automatically switches '=' to 'IN'", "Oracle returns zero rows silently"], ans: 1, exp: "Single-row comparison operators (=, >, <) fail if multiple rows are returned; multi-row operators like IN or ANY must be used." },
+  { id: 20, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "If EMPLOYEE has 6 rows and DEPARTMENT has 6 rows, how many rows does 'SELECT * FROM employee CROSS JOIN department' return?", opts: ["6 rows", "12 rows", "36 rows", "0 rows"], ans: 2, exp: "A Cross Join produces a Cartesian product of m x n rows (6 x 6 = 36 rows)." },
+  { id: 21, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "Why does 'SELECT * FROM employee e JOIN department d USING (d.dept_id)' raise ORA-01748?", opts: ["USING is not supported in Oracle", "Oracle requires simple, unqualified column names inside USING()", "dept_id must be a primary key in both tables", "USING only works with OUTER joins"], ans: 1, exp: "ORA-01748 occurs because the USING clause forbids table names or aliases; it must be written as USING (dept_id)." },
+  { id: 22, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "Which join returns all rows from both tables, including unmatched employees and departments with no employees?", opts: ["INNER JOIN", "LEFT OUTER JOIN", "RIGHT OUTER JOIN", "FULL OUTER JOIN"], ans: 3, exp: "FULL OUTER JOIN combines the behavior of both left and right outer joins, preserving all matching and non-matching rows from both sides." },
+  { id: 23, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "In an AFTER DELETE row-level trigger, what are the values of the :OLD and :NEW qualifiers?", opts: ["Both :OLD and :NEW hold the deleted row values", ":OLD holds the deleted values; :NEW is NULL", ":NEW holds the deleted values; :OLD is NULL", "Both :OLD and :NEW are NULL"], ans: 1, exp: "During a DELETE operation, :OLD contains the values prior to deletion, while :NEW is NULL because no new row exists." },
+  { id: 24, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "Which explicit cursor attribute returns TRUE if the most recent FETCH statement failed to return a row?", opts: ["%FOUND", "%NOTFOUND", "%ISOPEN", "%ROWCOUNT"], ans: 1, exp: "%NOTFOUND evaluates to TRUE when a FETCH finds no more rows, commonly used as the EXIT WHEN condition in loops." },
+  { id: 25, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "How are multi-table global assertions enforced in Oracle Database since CREATE ASSERTION is not supported?", opts: ["Using DEFAULT constraints", "Using Database Triggers (or Materialized Views with Constraints)", "Using the RENAME command", "Using DUAL table constraints"], ans: 1, exp: "Oracle does not support CREATE ASSERTION; single-table rules use CHECK constraints and multi-table rules use Triggers." }
+];
+
+const STORAGE_KEY = 'oracle_mcq_student_results_v1';
+let activeQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let studentAnswers = [];
+let currentStudent = {};
+let timerInterval = null;
+let startTime = null;
+let lastResultRecord = null;
+
+function getSavedResults() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveResultRecord(record) {
+  const list = getSavedResults();
+  list.unshift(record);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  updateRecordBadge();
+}
+
+function updateRecordBadge() {
+  document.getElementById('record-count').textContent = getSavedResults().length;
+}
+
+function computeGrade(pct) {
+  if (pct >= 90) return 'A+';
+  if (pct >= 75) return 'A';
+  if (pct >= 60) return 'B';
+  if (pct >= 40) return 'C';
+  return 'F';
+}
+
+function showView(viewName) {
+  ['student-setup', 'quiz', 'result', 'faculty-dashboard'].forEach(v => {
+    document.getElementById('view-' + v).classList.add('hidden');
+  });
+  document.getElementById('view-' + viewName).classList.remove('hidden');
+  if (viewName === 'faculty-dashboard') renderFacultyTable();
+}
+
+function startQuiz() {
+  const name = document.getElementById('stu-name').value.trim();
+  const roll = document.getElementById('stu-roll').value.trim();
+  const batch = document.getElementById('stu-batch').value.trim() || 'General';
+  const mod = document.getElementById('mod-filter').value;
+  const mins = parseInt(document.getElementById('timer-mode').value, 10);
+
+  if (!name || !roll) {
+    alert('Please enter both Student Name and Enrollment / Roll Number before starting.');
+    return;
+  }
+
+  activeQuestions = mod === 'ALL' ? [...QUESTIONS] : QUESTIONS.filter(q => q.mod === mod);
+  if (activeQuestions.length === 0) return;
+
+  currentStudent = { name, roll, batch, modLabel: document.getElementById('mod-filter').options[document.getElementById('mod-filter').selectedIndex].text };
+  currentIdx = 0;
+  score = 0;
+  studentAnswers = [];
+  startTime = Date.now();
+
+  document.getElementById('q-student-label').textContent = `${name} (${roll})`;
+  document.getElementById('live-score').textContent = '0';
+  
+  clearInterval(timerInterval);
+  const timerEl = document.getElementById('timer-display');
+  if (mins > 0) {
+    let remaining = mins * 60;
+    timerEl.classList.remove('hidden');
+    updateTimerText(remaining);
+    timerInterval = setInterval(() => {
+      remaining--;
+      updateTimerText(remaining);
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        finishQuiz();
+      }
+    }, 1000);
+  } else {
+    timerEl.classList.add('hidden');
+  }
+
+  showView('quiz');
+  renderQuestion();
+}
+
+function updateTimerText(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+}
+
+function renderQuestion() {
+  const qObj = activeQuestions[currentIdx];
+  document.getElementById('q-module-badge').textContent = qObj.modName;
+  document.getElementById('q-counter').textContent = `Question ${currentIdx + 1} of ${activeQuestions.length}`;
+  document.getElementById('progress-bar').style.width = `${((currentIdx) / activeQuestions.length) * 100}%`;
+  document.getElementById('q-text').textContent = `${currentIdx + 1}. ${qObj.q}`;
+  
+  const expBox = document.getElementById('explanation-box');
+  expBox.style.display = 'none';
+  expBox.innerHTML = '';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = true;
+  nextBtn.textContent = currentIdx === activeQuestions.length - 1 ? 'Submit & View Scorecard' : 'Next Question →';
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  qObj.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(selectedIdx, btnEl) {
+  const qObj = activeQuestions[currentIdx];
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  const isCorrect = selectedIdx === qObj.ans;
+  if (isCorrect) {
+    score++;
+    btnEl.classList.add('correct');
+  } else {
+    btnEl.classList.add('wrong');
+    buttons[qObj.ans].classList.add('correct');
+  }
+
+  studentAnswers.push({
+    qId: qObj.id,
+    q: qObj.q,
+    selected: qObj.opts[selectedIdx],
+    correct: qObj.opts[qObj.ans],
+    isCorrect
+  });
+
+  document.getElementById('live-score').textContent = score;
+  const expBox = document.getElementById('explanation-box');
+  expBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${qObj.exp}`;
+  expBox.style.display = 'block';
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  if (currentIdx < activeQuestions.length - 1) {
+    currentIdx++;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  clearInterval(timerInterval);
+  const elapsedSec = Math.round((Date.now() - startTime) / 1000);
+  const timeStr = `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
+  const total = activeQuestions.length;
+  const pct = Math.round((score / total) * 100);
+  const grade = computeGrade(pct);
+
+  lastResultRecord = {
+    id: 'RES-' + Date.now(),
+    name: currentStudent.name,
+    roll: currentStudent.roll,
+    batch: currentStudent.batch,
+    module: currentStudent.modLabel,
+    score: score,
+    total: total,
+    pct: pct,
+    grade: grade,
+    timeTaken: timeStr,
+    timestamp: new Date().toLocaleString(),
+    answers: studentAnswers
+  };
+
+  saveResultRecord(lastResultRecord);
+
+  document.getElementById('res-student-info').textContent = `${lastResultRecord.name} | Roll No: ${lastResultRecord.roll} | Batch: ${lastResultRecord.batch}`;
+  document.getElementById('res-score').textContent = `${score} / ${total}`;
+  document.getElementById('res-pct').textContent = `${pct}%`;
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-time').textContent = timeStr;
+
+  const breakdown = document.getElementById('res-breakdown');
+  breakdown.innerHTML = studentAnswers.map((item, idx) => `
+    <div style="padding: 0.75rem; border: 1px solid var(--border); border-left: 4px solid ${item.isCorrect ? 'var(--success)' : 'var(--danger)'}; border-radius: 8px; margin-bottom: 0.6rem; background: #fff;">
+      <div style="font-weight: 600; font-size: 0.93rem;">${idx + 1}. ${item.q}</div>
+      <div style="font-size: 0.85rem; margin-top: 0.25rem; color: ${item.isCorrect ? 'var(--success)' : 'var(--danger)'};">
+        Your Answer: <strong>${item.selected}</strong> ${item.isCorrect ? '✓' : ` | Correct Answer: <strong>${item.correct}</strong>`}
+      </div>
+    </div>
+  `).join('');
+
+  showView('result');
+}
+
+function copyResultCode() {
+  if (!lastResultRecord) return;
+  const payload = {
+    name: lastResultRecord.name,
+    roll: lastResultRecord.roll,
+    batch: lastResultRecord.batch,
+    module: lastResultRecord.module,
+    score: lastResultRecord.score,
+    total: lastResultRecord.total,
+    pct: lastResultRecord.pct,
+    grade: lastResultRecord.grade,
+    timeTaken: lastResultRecord.timeTaken,
+    timestamp: lastResultRecord.timestamp
+  };
+  const code = 'ORACLE_RES::' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  navigator.clipboard.writeText(code).then(() => {
+    alert('Result Code copied! Share this code with your teacher so they can import your score into the Student-Wise Result Dashboard.');
+  });
+}
+
+function toggleImportBox() {
+  document.getElementById('import-box').classList.toggle('hidden');
+}
+
+function importStudentCodes() {
+  const raw = document.getElementById('import-code-input').value.trim();
+  if (!raw) return;
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let imported = 0;
+  lines.forEach(line => {
+    try {
+      const b64 = line.startsWith('ORACLE_RES::') ? line.replace('ORACLE_RES::', '') : line;
+      const obj = JSON.parse(decodeURIComponent(escape(atob(b64))));
+      if (obj && obj.name && obj.roll && typeof obj.score === 'number') {
+        obj.id = 'IMP-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+        obj.answers = obj.answers || [];
+        saveResultRecord(obj);
+        imported++;
+      }
+    } catch (e) {}
+  });
+  document.getElementById('import-code-input').value = '';
+  renderFacultyTable();
+  alert(`Successfully imported ${imported} student result(s).`);
+}
+
+function renderFacultyTable() {
+  const all = getSavedResults();
+  const query = document.getElementById('search-student').value.toLowerCase();
+  const gradeFilter = document.getElementById('filter-grade').value;
+
+  const filtered = all.filter(r => {
+    const matchesSearch = r.name.toLowerCase().includes(query) || r.roll.toLowerCase().includes(query) || (r.batch || '').toLowerCase().includes(query);
+    const matchesGrade = gradeFilter === 'ALL' || r.grade === gradeFilter;
+    return matchesSearch && matchesGrade;
+  });
+
+  document.getElementById('dash-total').textContent = filtered.length;
+  if (filtered.length > 0) {
+    const avg = Math.round(filtered.reduce((acc, r) => acc + r.pct, 0) / filtered.length);
+    const high = Math.max(...filtered.map(r => r.pct));
+    const passCount = filtered.filter(r => r.pct >= 40).length;
+    document.getElementById('dash-avg').textContent = avg + '%';
+    document.getElementById('dash-high').textContent = high + '%';
+    document.getElementById('dash-pass').textContent = Math.round((passCount / filtered.length) * 100) + '%';
+  } else {
+    document.getElementById('dash-avg').textContent = '0%';
+    document.getElementById('dash-high').textContent = '0%';
+    document.getElementById('dash-pass').textContent = '0%';
+  }
+
+  const tbody = document.getElementById('faculty-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet. Complete a quiz or click "+ Import Student Result Code" to add student results.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    const pillClass = r.grade.startsWith('A') ? 'grade-A' : r.grade === 'B' ? 'grade-B' : r.grade === 'C' ? 'grade-C' : 'grade-F';
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${r.roll}</strong></td>
+        <td>${r.name}</td>
+        <td>${r.batch || '-'}</td>
+        <td>${r.module}</td>
+        <td><strong>${r.score}/${r.total}</strong></td>
+        <td>${r.pct}%</td>
+        <td><span class="grade-pill ${pillClass}">${r.grade}</span></td>
+        <td style="font-size: 0.8rem; color: var(--muted);">${r.timestamp}</td>
+        <td><button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="inspectStudent('${r.id}')">View</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function inspectStudent(id) {
+  const rec = getSavedResults().find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById('modal-title').textContent = `${rec.name} (${rec.roll}) — ${rec.score}/${rec.total} (${rec.pct}% | Grade ${rec.grade})`;
+  const body = document.getElementById('modal-body');
+  if (!rec.answers || rec.answers.length === 0) {
+    body.innerHTML = `<p style="color: var(--muted);">Summary record imported via Result Code.<br><strong>Batch:</strong> ${rec.batch} | <strong>Module:</strong> ${rec.module} | <strong>Time Taken:</strong> ${rec.timeTaken} | <strong>Submitted:</strong> ${rec.timestamp}</p>`;
+  } else {
+    body.innerHTML = rec.answers.map((a, idx) => `
+      <div style="padding: 0.65rem; border: 1px solid var(--border); border-left: 4px solid ${a.isCorrect ? 'var(--success)' : 'var(--danger)'}; border-radius: 6px; margin-bottom: 0.5rem;">
+        <div style="font-weight: 600; font-size: 0.9rem;">${idx + 1}. ${a.q}</div>
+        <div style="font-size: 0.84rem; color: ${a.isCorrect ? 'var(--success)' : 'var(--danger)'};">
+          Selected: ${a.selected} ${a.isCorrect ? '✓' : `| Correct: ${a.correct}`}
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('detail-modal').classList.add('hidden');
+}
+
+function exportCSV() {
+  const all = getSavedResults();
+  if (all.length === 0) {
+    alert('No student records available to export.');
+    return;
+  }
+  const headers = ['Roll No', 'Student Name', 'Batch', 'Module', 'Score', 'Total', 'Percentage', 'Grade', 'Time Taken', 'Submitted At'];
+  const rows = all.map(r => [
+    `"${r.roll}"`, `"${r.name}"`, `"${r.batch || ''}"`, `"${r.module}"`,
+    r.score, r.total, `${r.pct}%`, `"${r.grade}"`, `"${r.timeTaken || ''}"`, `"${r.timestamp}"`
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'Oracle_SQL_Student_Wise_Results.csv';
+  link.click();
+}
+
+function clearAllResults() {
+  if (confirm('Are you sure you want to delete all stored student results from this browser?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    updateRecordBadge();
+    renderFacultyTable();
+  }
+}
+
+function copyShareLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Current page URL copied to clipboard! Note: If you are viewing a local file, host index.html on Netlify Drop, Cloudflare Pages, or GitHub Pages to get a public internet link.');
+  });
+}
+
+// Check if URL has shared result parameter (?res=...)
+window.addEventListener('DOMContentLoaded', () => {
+  updateRecordBadge();
+});
+</script>
+</body>
+</html>
