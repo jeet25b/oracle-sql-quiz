@@ -2053,9 +2053,7 @@ function toggleImportBox() {
 function importStudentCodes() {
   const raw = document.getElementById('import-code-input').value.trim();
   if (!raw) return;
-  const lines = raw.split(/
-?
-/).map(l => l.trim()).filter(Boolean);
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   let imported = 0;
   lines.forEach(line => {
     try {
