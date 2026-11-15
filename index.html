@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oracle SQL & PL/SQL Mastery Quiz (100 MCQs) — Student & Faculty Portal</title>
+<title>Oracle SQL & PL/SQL Mastery Quiz (100 MCQs)</title>
 <style>
   :root {
     --primary: #1b365d;
@@ -90,7 +90,6 @@
   .hidden { display: none !important; }
   .alert { padding: 0.85rem 1rem; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.9rem; margin-bottom: 1rem; }
   .alert-success { background: var(--success-bg); border-color: #86efac; color: #14532d; }
-  .alert-warn { background: var(--warning-bg); border-color: #fde68a; color: #92400e; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
   .modal { background: #fff; border-radius: 12px; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 </style>
@@ -100,12 +99,12 @@
 <header>
   <div class="brand">
     <h1>Oracle SQL &amp; PL/SQL Assessment Portal</h1>
-    <p>100-Question Bank (Modules 1–9) with Live Google Sheets Sync</p>
+    <p id="header-subtitle">100-Question Bank (Modules 1–9) — Student Assessment</p>
   </div>
   <div class="nav-actions">
-    <button class="btn btn-secondary" onclick="showView('student-setup')">Student Quiz</button>
-    <button class="btn btn-secondary" onclick="showView('faculty-dashboard')">Faculty Results (<span id="record-count">0</span>)</button>
-    <button class="btn btn-primary" onclick="copyShareLink()">Share Link</button>
+    <button class="btn btn-secondary teacher-only hidden" onclick="showView('student-setup')">Student View</button>
+    <button class="btn btn-secondary teacher-only hidden" onclick="showView('faculty-dashboard')">Faculty Results (<span id="record-count">0</span>)</button>
+    <button class="btn btn-primary" id="share-btn" onclick="copyShareLink()">Share Student Link</button>
   </div>
 </header>
 
@@ -113,7 +112,7 @@
   <!-- VIEW 1: STUDENT SETUP -->
   <section id="view-student-setup" class="card">
     <h2 style="color: var(--primary); margin-bottom: 0.4rem;">Student Registration &amp; Test Setup</h2>
-    <p style="color: var(--muted); font-size: 0.95rem;">Enter your details below to begin. Your score and grade will automatically submit to the Faculty Google Sheet upon completion.</p>
+    <p style="color: var(--muted); font-size: 0.95rem;">Enter your details below to begin your Oracle SQL &amp; PL/SQL assessment.</p>
     
     <div class="form-grid">
       <div class="form-group">
@@ -164,7 +163,7 @@
 
     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
       <button class="btn btn-primary" onclick="startQuiz()">Start Assessment</button>
-      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Faculty Dashboard &amp; Sheet Setup</button>
+      <button class="btn btn-outline teacher-only hidden" onclick="showView('faculty-dashboard')">Open Faculty Results</button>
     </div>
   </section>
 
@@ -201,7 +200,7 @@
         <p id="res-student-info" style="color: var(--muted); font-weight: 600;"></p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-success" onclick="copyResultCode()">Copy Backup Result Code</button>
+        <button class="btn btn-success" onclick="copyResultCode()">Copy Result Code for Teacher</button>
         <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
       </div>
     </div>
@@ -213,8 +212,8 @@
       <div class="stat-box"><div class="stat-val" id="res-time">0m 0s</div><div class="stat-lbl">Time Taken</div></div>
     </div>
 
-    <div id="sync-status-banner" class="alert">
-      Syncing result with Google Sheets...
+    <div class="alert alert-success">
+      <strong>Submission Complete!</strong> Click <strong>"Copy Result Code for Teacher"</strong> above and send it to your teacher via WhatsApp or Email so they can add your score to the class result sheet.
     </div>
 
     <h3 style="color: var(--primary); margin: 1.25rem 0 0.5rem;">Question-by-Question Review</h3>
@@ -222,41 +221,29 @@
 
     <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
       <button class="btn btn-primary" onclick="showView('student-setup')">Take Another Attempt</button>
-      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Open Faculty Result Table</button>
+      <button class="btn btn-outline teacher-only hidden" onclick="showView('faculty-dashboard')">Open Faculty Result Table</button>
     </div>
   </section>
 
-  <!-- VIEW 4: FACULTY STUDENT-WISE RESULTS DASHBOARD -->
+  <!-- VIEW 4: FACULTY STUDENT-WISE RESULTS DASHBOARD (TEACHER LINK ONLY) -->
   <section id="view-faculty-dashboard" class="card hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
       <div>
-        <h2 style="color: var(--primary);">Student-Wise MCQ Results</h2>
-        <p style="color: var(--muted); font-size: 0.9rem;">Live results synced from Google Sheets + local browser storage.</p>
+        <h2 style="color: var(--primary);">Teacher Portal — Student-Wise MCQ Results</h2>
+        <p style="color: var(--muted); font-size: 0.9rem;">Import student result codes, inspect answer sheets, or download the class result sheet in Excel (CSV).</p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="syncFromGoogleSheet()">Refresh from Google Sheet</button>
-        <button class="btn btn-outline" onclick="toggleConfigBox()">Google Sheet Settings</button>
-        <button class="btn btn-outline" onclick="toggleImportBox()">+ Import Code</button>
-        <button class="btn btn-success" onclick="exportCSV()">Export CSV</button>
+        <button class="btn btn-primary" onclick="toggleImportBox()">+ Import Student Result Code</button>
+        <button class="btn btn-success" onclick="exportCSV()">Export CSV (Excel)</button>
+        <button class="btn btn-outline" onclick="copyTeacherLink()">Copy Teacher Link</button>
+        <button class="btn btn-danger" onclick="clearAllResults()">Clear Records</button>
       </div>
     </div>
 
-    <!-- Google Apps Script Config Box -->
-    <div id="config-box" class="hidden" style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 1.1rem; margin-bottom: 1.25rem;">
-      <h4 style="color: var(--primary); margin-bottom: 0.35rem;">Google Apps Script Web App URL</h4>
-      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 0.6rem;">
-        Paste your deployed Google Apps Script Web App URL below (or hardcode it into <code>DEFAULT_GAS_URL</code> inside <code>index.html</code> before uploading to GitHub so every student automatically submits to your sheet).
-      </p>
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <input type="url" id="gas-url-input" style="flex: 1; min-width: 260px;" placeholder="https://script.google.com/macros/s/.../exec">
-        <button class="btn btn-primary" onclick="saveGasUrl()">Save &amp; Sync</button>
-      </div>
-    </div>
-
-    <!-- Import Box for Backup Codes -->
-    <div id="import-box" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
-      <label for="import-code-input">Paste Backup Student Result Code(s) below (one per line):</label>
-      <textarea id="import-code-input" rows="3" style="width: 100%; margin: 0.5rem 0; font-family: monospace;" placeholder="Paste ORACLE_RES:: code(s)..."></textarea>
+    <!-- Import Box for Student Codes -->
+    <div id="import-box" style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
+      <label for="import-code-input">Paste Student Result Code(s) below (one per line):</label>
+      <textarea id="import-code-input" rows="3" style="width: 100%; margin: 0.5rem 0; font-family: monospace;" placeholder="Paste ORACLE_RES:: code(s) sent by students..."></textarea>
       <button class="btn btn-primary" onclick="importStudentCodes()">Add to Result Table</button>
     </div>
 
@@ -318,12 +305,6 @@
 </div>
 
 <script>
-// =========================================================================
-// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL INSIDE THE QUOTES BELOW
-// Example: const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycb.../exec";
-// =========================================================================
-const DEFAULT_GAS_URL = "";
-
 const QUESTIONS = [
   {
     "id": 1,
@@ -1728,7 +1709,6 @@ const QUESTIONS = [
 ];
 
 const STORAGE_KEY = 'oracle_mcq_student_results_v2';
-const GAS_URL_KEY = 'oracle_mcq_gas_url_v1';
 let activeQuestions = [];
 let currentIdx = 0;
 let score = 0;
@@ -1737,27 +1717,18 @@ let currentStudent = {};
 let timerInterval = null;
 let startTime = null;
 let lastResultRecord = null;
-let cloudResultsCache = null;
+let isTeacherMode = false;
 
-function getGasUrl() {
-  return DEFAULT_GAS_URL || localStorage.getItem(GAS_URL_KEY) || '';
-}
-
-function saveGasUrl() {
-  const val = document.getElementById('gas-url-input').value.trim();
-  localStorage.setItem(GAS_URL_KEY, val);
-  alert('Google Apps Script URL saved!');
-  syncFromGoogleSheet();
-}
-
-function toggleConfigBox() {
-  const box = document.getElementById('config-box');
-  box.classList.toggle('hidden');
-  document.getElementById('gas-url-input').value = getGasUrl();
+function checkTeacherMode() {
+  const params = new URLSearchParams(window.location.search);
+  isTeacherMode = params.get('role') === 'teacher' || window.location.hash === '#teacher';
+  if (isTeacherMode) {
+    document.querySelectorAll('.teacher-only').forEach(el => el.classList.remove('hidden'));
+    document.getElementById('header-subtitle').textContent = '100-Question Bank (Modules 1–9) — Faculty Administration Mode';
+  }
 }
 
 function getSavedResults() {
-  if (cloudResultsCache !== null) return cloudResultsCache;
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
   } catch (e) {
@@ -1766,15 +1737,15 @@ function getSavedResults() {
 }
 
 function saveLocalResult(record) {
-  let list = [];
-  try { list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) {}
+  const list = getSavedResults();
   list.unshift(record);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
   updateRecordBadge();
 }
 
 function updateRecordBadge() {
-  document.getElementById('record-count').textContent = getSavedResults().length;
+  const el = document.getElementById('record-count');
+  if (el) el.textContent = getSavedResults().length;
 }
 
 function computeGrade(pct) {
@@ -1786,13 +1757,15 @@ function computeGrade(pct) {
 }
 
 function showView(viewName) {
+  if (viewName === 'faculty-dashboard' && !isTeacherMode) {
+    viewName = 'student-setup';
+  }
   ['student-setup', 'quiz', 'result', 'faculty-dashboard'].forEach(v => {
     document.getElementById('view-' + v).classList.add('hidden');
   });
   document.getElementById('view-' + viewName).classList.remove('hidden');
   if (viewName === 'faculty-dashboard') {
     renderFacultyTable();
-    if (getGasUrl()) syncFromGoogleSheet();
   }
 }
 
@@ -1934,7 +1907,7 @@ function nextQuestion() {
   }
 }
 
-async function finishQuiz() {
+function finishQuiz() {
   clearInterval(timerInterval);
   const elapsedSec = Math.round((Date.now() - startTime) / 1000);
   const timeStr = `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
@@ -1976,54 +1949,6 @@ async function finishQuiz() {
   `).join('');
 
   showView('result');
-  await pushResultToGoogleSheet(lastResultRecord);
-}
-
-async function pushResultToGoogleSheet(record) {
-  const banner = document.getElementById('sync-status-banner');
-  const gasUrl = getGasUrl();
-  if (!gasUrl) {
-    banner.className = 'alert alert-warn';
-    banner.innerHTML = '<strong>Local Mode:</strong> Google Apps Script URL is not configured yet. Click <strong>"Copy Backup Result Code"</strong> above to share your result with your teacher, or configure the Google Sheet URL in Faculty Results.';
-    return;
-  }
-
-  banner.className = 'alert';
-  banner.textContent = 'Submitting your scorecard to Faculty Google Sheet...';
-
-  try {
-    await fetch(gasUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(record)
-    });
-    banner.className = 'alert alert-success';
-    banner.innerHTML = '<strong>Submitted Successfully!</strong> Your marks and answer breakdown have been recorded directly into the Faculty Google Sheet.';
-  } catch (err) {
-    banner.className = 'alert alert-warn';
-    banner.innerHTML = '<strong>Network Warning:</strong> Could not reach Google Sheets automatically. Please click <strong>"Copy Backup Result Code"</strong> above and send it to your teacher.';
-  }
-}
-
-async function syncFromGoogleSheet() {
-  const gasUrl = getGasUrl();
-  if (!gasUrl) {
-    alert('Please configure your Google Apps Script Web App URL in "Google Sheet Settings" first.');
-    return;
-  }
-  try {
-    const resp = await fetch(gasUrl);
-    const data = await resp.json();
-    if (Array.isArray(data)) {
-      cloudResultsCache = data.reverse();
-      updateRecordBadge();
-      renderFacultyTable();
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Unable to fetch rows from Google Sheet. Ensure your Apps Script Web App is deployed with access set to "Anyone".');
-  }
 }
 
 function copyResultCode() {
@@ -2042,7 +1967,7 @@ function copyResultCode() {
   };
   const code = 'ORACLE_RES::' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   navigator.clipboard.writeText(code).then(() => {
-    alert('Backup Result Code copied!');
+    alert('Result Code copied! Now send this code to your teacher on WhatsApp or Email.');
   });
 }
 
@@ -2069,7 +1994,7 @@ function importStudentCodes() {
   });
   document.getElementById('import-code-input').value = '';
   renderFacultyTable();
-  alert(`Imported ${imported} student result(s).`);
+  alert(`Successfully imported ${imported} student result(s).`);
 }
 
 function renderFacultyTable() {
@@ -2099,7 +2024,7 @@ function renderFacultyTable() {
 
   const tbody = document.getElementById('faculty-tbody');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet. Paste student result codes above to add them.</td></tr>`;
     return;
   }
 
@@ -2170,15 +2095,36 @@ function exportCSV() {
   link.click();
 }
 
+function clearAllResults() {
+  if (confirm('Are you sure you want to delete all stored student results from this browser?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    updateRecordBadge();
+    renderFacultyTable();
+  }
+}
+
 function copyShareLink() {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    alert('Quiz link copied to clipboard!');
+  const baseUrl = window.location.origin + window.location.pathname;
+  navigator.clipboard.writeText(baseUrl).then(() => {
+    alert('Student Quiz Link copied: ' + baseUrl);
+  });
+}
+
+function copyTeacherLink() {
+  const teacherUrl = window.location.origin + window.location.pathname + '?role=teacher';
+  navigator.clipboard.writeText(teacherUrl).then(() => {
+    alert('Teacher Portal Link copied: ' + teacherUrl);
   });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  checkTeacherMode();
   updateRecordBadge();
-  if (getGasUrl()) syncFromGoogleSheet();
+  if (isTeacherMode) {
+    showView('faculty-dashboard');
+  } else {
+    showView('student-setup');
+  }
 });
 </script>
 </body>
