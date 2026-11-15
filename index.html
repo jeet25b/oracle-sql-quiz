@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oracle SQL & PL/SQL Mastery Quiz — Student & Faculty Portal</title>
+<title>Oracle SQL & PL/SQL Mastery Quiz (100 MCQs) — Student & Faculty Portal</title>
 <style>
   :root {
     --primary: #1b365d;
@@ -52,8 +52,8 @@
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
   .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
   label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
-  input, select { padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
-  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.12); }
+  input, select, textarea { padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.12); }
 
   /* Quiz UI */
   .quiz-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
@@ -89,6 +89,8 @@
 
   .hidden { display: none !important; }
   .alert { padding: 0.85rem 1rem; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.9rem; margin-bottom: 1rem; }
+  .alert-success { background: var(--success-bg); border-color: #86efac; color: #14532d; }
+  .alert-warn { background: var(--warning-bg); border-color: #fde68a; color: #92400e; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
   .modal { background: #fff; border-radius: 12px; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 </style>
@@ -98,7 +100,7 @@
 <header>
   <div class="brand">
     <h1>Oracle SQL &amp; PL/SQL Assessment Portal</h1>
-    <p>Modules 1–9 Conceptual &amp; Interview MCQ Test with Student-Wise Grading</p>
+    <p>100-Question Bank (Modules 1–9) with Live Google Sheets Sync</p>
   </div>
   <div class="nav-actions">
     <button class="btn btn-secondary" onclick="showView('student-setup')">Student Quiz</button>
@@ -111,7 +113,7 @@
   <!-- VIEW 1: STUDENT SETUP -->
   <section id="view-student-setup" class="card">
     <h2 style="color: var(--primary); margin-bottom: 0.4rem;">Student Registration &amp; Test Setup</h2>
-    <p style="color: var(--muted); font-size: 0.95rem;">Enter your details below to begin. Your score, grade, and question-by-question breakdown will be recorded automatically.</p>
+    <p style="color: var(--muted); font-size: 0.95rem;">Enter your details below to begin. Your score and grade will automatically submit to the Faculty Google Sheet upon completion.</p>
     
     <div class="form-grid">
       <div class="form-group">
@@ -129,31 +131,40 @@
       <div class="form-group">
         <label for="mod-filter">Syllabus Module</label>
         <select id="mod-filter">
-          <option value="ALL">All Modules (25 Questions)</option>
-          <option value="M1">Module 1: DBMS &amp; SQL Basics</option>
-          <option value="M2">Module 2: Oracle Data Types</option>
-          <option value="M3">Module 3: Integrity &amp; Key Constraints</option>
-          <option value="M4">Module 4: DDL Commands</option>
-          <option value="M5">Module 5: DML &amp; Variables</option>
-          <option value="M6">Module 6: DQL, DUAL &amp; Aggregates</option>
-          <option value="M7">Module 7: Subqueries</option>
-          <option value="M8">Module 8: Joins &amp; USING Clause</option>
-          <option value="M9">Module 9: Triggers, Cursors &amp; Assertions</option>
+          <option value="ALL">All Modules (100 Questions)</option>
+          <option value="M1">Module 1: DBMS &amp; SQL Basics (12 Qs)</option>
+          <option value="M2">Module 2: Oracle Data Types (10 Qs)</option>
+          <option value="M3">Module 3: Integrity &amp; Key Constraints (12 Qs)</option>
+          <option value="M4">Module 4: DDL Commands (12 Qs)</option>
+          <option value="M5">Module 5: DML &amp; Variables (10 Qs)</option>
+          <option value="M6">Module 6: DQL, DUAL &amp; Aggregates (12 Qs)</option>
+          <option value="M7">Module 7: Subqueries (10 Qs)</option>
+          <option value="M8">Module 8: Joins &amp; USING Clause (10 Qs)</option>
+          <option value="M9">Module 9: Triggers, Cursors &amp; Assertions (12 Qs)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="q-limit">Question Set Size</label>
+        <select id="q-limit">
+          <option value="ALL">All Selected Module Questions</option>
+          <option value="25">Random 25 Questions (Quick Test)</option>
+          <option value="50">Random 50 Questions (Mid-Term)</option>
         </select>
       </div>
       <div class="form-group">
         <label for="timer-mode">Time Limit</label>
         <select id="timer-mode">
           <option value="0">Untimed Practice Mode</option>
-          <option value="15">15 Minutes (Exam Mode)</option>
-          <option value="25">25 Minutes (Standard Test)</option>
+          <option value="15">15 Minutes</option>
+          <option value="30">30 Minutes</option>
+          <option value="60">60 Minutes (Full 100-Q Exam)</option>
         </select>
       </div>
     </div>
 
     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
       <button class="btn btn-primary" onclick="startQuiz()">Start Assessment</button>
-      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">View Student-Wise Results</button>
+      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Faculty Dashboard &amp; Sheet Setup</button>
     </div>
   </section>
 
@@ -165,8 +176,8 @@
         <span style="font-size: 0.88rem; color: var(--muted); margin-left: 0.5rem;" id="q-student-label"></span>
       </div>
       <div style="display: flex; gap: 0.6rem; align-items: center;">
-        <span class="badge badge-timer hidden" id="timer-display">25:00</span>
-        <span style="font-weight: 700; color: var(--primary);" id="q-counter">Question 1 of 25</span>
+        <span class="badge badge-timer hidden" id="timer-display">60:00</span>
+        <span style="font-weight: 700; color: var(--primary);" id="q-counter">Question 1 of 100</span>
       </div>
     </div>
 
@@ -190,20 +201,20 @@
         <p id="res-student-info" style="color: var(--muted); font-weight: 600;"></p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-success" onclick="copyResultCode()">Copy Result Code for Teacher</button>
+        <button class="btn btn-success" onclick="copyResultCode()">Copy Backup Result Code</button>
         <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
       </div>
     </div>
 
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-val" id="res-score">0/25</div><div class="stat-lbl">Marks Scored</div></div>
+      <div class="stat-box"><div class="stat-val" id="res-score">0/100</div><div class="stat-lbl">Marks Scored</div></div>
       <div class="stat-box"><div class="stat-val" id="res-pct">0%</div><div class="stat-lbl">Percentage</div></div>
       <div class="stat-box"><div class="stat-val" id="res-grade">A</div><div class="stat-lbl">Grade</div></div>
       <div class="stat-box"><div class="stat-val" id="res-time">0m 0s</div><div class="stat-lbl">Time Taken</div></div>
     </div>
 
-    <div class="alert">
-      <strong>Submission Note:</strong> Your result has been saved to this browser's Faculty Results table. If you are taking this test on your own device and need to submit your score to your teacher, click <strong>"Copy Result Code for Teacher"</strong> above and send the code via WhatsApp/Email so they can import it into their Student-Wise Result Dashboard.
+    <div id="sync-status-banner" class="alert">
+      Syncing result with Google Sheets...
     </div>
 
     <h3 style="color: var(--primary); margin: 1.25rem 0 0.5rem;">Question-by-Question Review</h3>
@@ -211,7 +222,7 @@
 
     <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
       <button class="btn btn-primary" onclick="showView('student-setup')">Take Another Attempt</button>
-      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Open Student-Wise Result Table</button>
+      <button class="btn btn-outline" onclick="showView('faculty-dashboard')">Open Faculty Result Table</button>
     </div>
   </section>
 
@@ -220,19 +231,32 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
       <div>
         <h2 style="color: var(--primary);">Student-Wise MCQ Results</h2>
-        <p style="color: var(--muted); font-size: 0.9rem;">View, filter, import remote student result codes, or export all student scores to Excel (CSV).</p>
+        <p style="color: var(--muted); font-size: 0.9rem;">Live results synced from Google Sheets + local browser storage.</p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="toggleImportBox()">+ Import Student Result Code</button>
-        <button class="btn btn-success" onclick="exportCSV()">Export CSV (Excel)</button>
-        <button class="btn btn-danger" onclick="clearAllResults()">Clear Records</button>
+        <button class="btn btn-primary" onclick="syncFromGoogleSheet()">Refresh from Google Sheet</button>
+        <button class="btn btn-outline" onclick="toggleConfigBox()">Google Sheet Settings</button>
+        <button class="btn btn-outline" onclick="toggleImportBox()">+ Import Code</button>
+        <button class="btn btn-success" onclick="exportCSV()">Export CSV</button>
       </div>
     </div>
 
-    <!-- Import Box for Remote Submissions -->
+    <!-- Google Apps Script Config Box -->
+    <div id="config-box" class="hidden" style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 1.1rem; margin-bottom: 1.25rem;">
+      <h4 style="color: var(--primary); margin-bottom: 0.35rem;">Google Apps Script Web App URL</h4>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 0.6rem;">
+        Paste your deployed Google Apps Script Web App URL below (or hardcode it into <code>DEFAULT_GAS_URL</code> inside <code>index.html</code> before uploading to GitHub so every student automatically submits to your sheet).
+      </p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <input type="url" id="gas-url-input" style="flex: 1; min-width: 260px;" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn btn-primary" onclick="saveGasUrl()">Save &amp; Sync</button>
+      </div>
+    </div>
+
+    <!-- Import Box for Backup Codes -->
     <div id="import-box" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
-      <label for="import-code-input">Paste Student Result Code(s) below (one per line):</label>
-      <textarea id="import-code-input" rows="3" style="width: 100%; margin: 0.5rem 0; padding: 0.6rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: monospace;" placeholder="Paste code(s) copied by students..."></textarea>
+      <label for="import-code-input">Paste Backup Student Result Code(s) below (one per line):</label>
+      <textarea id="import-code-input" rows="3" style="width: 100%; margin: 0.5rem 0; font-family: monospace;" placeholder="Paste ORACLE_RES:: code(s)..."></textarea>
       <button class="btn btn-primary" onclick="importStudentCodes()">Add to Result Table</button>
     </div>
 
@@ -294,35 +318,1417 @@
 </div>
 
 <script>
+// =========================================================================
+// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL INSIDE THE QUOTES BELOW
+// Example: const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycb.../exec";
+// =========================================================================
+const DEFAULT_GAS_URL = "";
+
 const QUESTIONS = [
-  { id: 1, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "Which of the following represents the correct logical execution order of clauses in Oracle SQL?", opts: ["SELECT -> FROM -> WHERE -> GROUP BY -> HAVING -> ORDER BY", "FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY", "FROM -> GROUP BY -> WHERE -> HAVING -> SELECT -> ORDER BY", "SELECT -> WHERE -> FROM -> GROUP BY -> HAVING -> ORDER BY"], ans: 1, exp: "While we write SELECT first, Oracle logically executes FROM first, followed by WHERE, GROUP BY, HAVING, SELECT, and finally ORDER BY." },
-  { id: 2, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "What is the maximum character length allowed for unquoted table or column identifiers in Oracle 12.2 and later?", opts: ["30 characters", "64 characters", "128 characters", "255 characters"], ans: 2, exp: "Oracle increased the maximum identifier length from 30 characters (pre-12.2) to 128 characters in Oracle 12.2 and later." },
-  { id: 3, mod: "M1", modName: "Module 1: DBMS & SQL Basics", q: "Why does the condition 'WHERE salary = NULL' fail to return rows with missing salaries in Oracle?", opts: ["NULL is treated as 0 in numeric columns", "NULL is not equal to anything, not even another NULL", "NULL requires single quotes ('NULL')", "= NULL is only valid in PL/SQL"], ans: 1, exp: "In Oracle SQL, NULL represents an unknown/missing value and cannot be compared with '=' or '!='; you must use IS NULL or IS NOT NULL." },
-  { id: 4, mod: "M2", modName: "Module 2: Oracle Data Types", q: "How do CHAR(10) and VARCHAR2(10) differ when storing the 4-character string 'AJAY'?", opts: ["Both store 4 bytes without padding", "CHAR(10) pads with 6 trailing spaces; VARCHAR2(10) uses 4 bytes", "VARCHAR2(10) pads with spaces; CHAR(10) truncates", "CHAR(10) allows up to 4000 bytes; VARCHAR2(10) allows 2000 bytes"], ans: 1, exp: "CHAR right-pads shorter strings with spaces to its fixed length (up to 2000 bytes), whereas VARCHAR2 stores variable lengths (up to 4000 bytes) without padding." },
-  { id: 5, mod: "M2", modName: "Module 2: Oracle Data Types", q: "How does Oracle internally store an INTEGER column, and what value is stored if 12.5 is inserted?", opts: ["BINARY_INTEGER; stores 12", "NUMBER(38, 0); rounds to 13", "NUMBER(10, 2); stores 12.50", "Raises an ORA-01722 invalid number error"], ans: 1, exp: "Oracle converts ANSI INTEGER to NUMBER(38, 0) and rounds fractional values (12.5 rounds to 13)." },
-  { id: 6, mod: "M2", modName: "Module 2: Oracle Data Types", q: "What is the fixed storage size of Oracle's DATE data type and what components does it store?", opts: ["4 bytes; Year, Month, Day only", "7 bytes; Century, Year, Month, Day, Hour, Minute, Second", "8 bytes; Date, Time, and Time Zone", "11 bytes; Date, Time, and Fractional Seconds"], ans: 1, exp: "Oracle DATE uses a fixed 7-byte format storing Century, Year, Month, Day, Hour, Minute, and Second." },
-  { id: 7, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "Which two constraints in Oracle can ONLY be defined at the column level and never at the table level?", opts: ["PRIMARY KEY and UNIQUE", "NOT NULL and DEFAULT", "CHECK and FOREIGN KEY", "UNIQUE and CHECK"], ans: 1, exp: "NOT NULL and DEFAULT are strictly column-level specifications; PRIMARY KEY, UNIQUE, FOREIGN KEY, and CHECK can be declared at either level." },
-  { id: 8, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "How does Oracle Database treat NULL values in a column with a UNIQUE constraint?", opts: ["Rejects all NULL values", "Allows at most one NULL value", "Allows multiple NULL values", "Converts NULL to an empty string"], ans: 2, exp: "Because Oracle never considers one NULL equal to another NULL, multiple NULL values are permitted in a UNIQUE column." },
-  { id: 9, mod: "M3", modName: "Module 3: Integrity & Key Constraints", q: "In Oracle's USER_CONSTRAINTS view, what constraint type is indicated by the letter 'R'?", opts: ["Read-Only Constraint", "Row-Level Check", "Foreign Key (Referential Integrity)", "Primary Key"], ans: 2, exp: "In USER_CONSTRAINTS, P = Primary Key, U = Unique, R = Foreign Key (Referential), and C = Check / Not Null." },
-  { id: 10, mod: "M4", modName: "Module 4: DDL Commands", q: "Which statement accurately distinguishes TRUNCATE from DELETE in Oracle?", opts: ["TRUNCATE can be rolled back; DELETE cannot", "TRUNCATE is DDL, releases storage space, and auto-commits", "DELETE releases storage space back to the tablespace", "TRUNCATE fires row-level DELETE triggers"], ans: 1, exp: "TRUNCATE is a DDL command that removes all rows rapidly, deallocates storage space, and issues an implicit COMMIT." },
-  { id: 11, mod: "M4", modName: "Module 4: DDL Commands", q: "Which of the following database objects CANNOT be directly renamed using the Oracle RENAME statement?", opts: ["Table", "View", "Sequence", "Trigger or Stored Procedure"], ans: 3, exp: "RENAME works on tables, views, sequences, synonyms, and private database links, but procedures, functions, packages, and triggers must be recreated." },
-  { id: 12, mod: "M4", modName: "Module 4: DDL Commands", q: "What does the NOVALIDATE option do when enabling or adding a constraint via ALTER TABLE?", opts: ["Disables the constraint permanently", "Enforces the constraint on future DML without checking existing rows", "Deletes existing rows that violate the constraint", "Drops dependent foreign keys automatically"], ans: 1, exp: "ENABLE NOVALIDATE activates the rule for new/updated rows immediately without scanning or failing on pre-existing data." },
-  { id: 13, mod: "M5", modName: "Module 5: DML & Variables", q: "Why does Oracle never guarantee the display order of rows from 'SELECT * FROM employee' without an ORDER BY clause?", opts: ["Oracle sorts rows alphabetically by primary key automatically", "Oracle stores rows in an unordered heap and reuses space from deleted rows", "SELECT * randomizes output for security", "Rows are ordered by column size"], ans: 1, exp: "Oracle uses an unordered heap structure and fills gaps left by deleted records, so ORDER BY is mandatory for guaranteed sorting." },
-  { id: 14, mod: "M5", modName: "Module 5: DML & Variables", q: "What is the difference between '&var' and ':var' in Oracle environments?", opts: ["&var is a SQL*Plus substitution variable; :var is a bind variable", "&var is for numbers; :var is only for strings", ":var is used in SQL*Plus; &var is used in PL/SQL triggers", "Both are identical DDL commands"], ans: 0, exp: "Ampersand (&) denotes a SQL*Plus substitution variable, whereas colon (:) denotes a bind variable used in Oracle Live SQL and SQL Developer." },
-  { id: 15, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "Which statement accurately describes Oracle's built-in DUAL table?", opts: ["It has two columns and zero rows", "It has one VARCHAR2(1) column named DUMMY with one row containing 'X'", "It stores all user table metadata", "It is a temporary table created per session"], ans: 1, exp: "DUAL contains a single column DUMMY VARCHAR2(1) and a single row 'X', used for evaluating expressions and functions." },
-  { id: 16, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "How do Oracle aggregate functions (SUM, AVG, MIN, MAX, COUNT) handle NULL values?", opts: ["All aggregate functions treat NULL as 0", "All ignore NULL values except COUNT(*), which counts all rows", "All return NULL if any row in the column is NULL", "COUNT(column_name) includes NULLs while COUNT(*) ignores them"], ans: 1, exp: "Aggregate functions ignore NULLs in column arguments, whereas COUNT(*) counts every row regardless of NULLs." },
-  { id: 17, mod: "M6", modName: "Module 6: DQL, DUAL & Aggregates", q: "What is the key difference between the WHERE clause and the HAVING clause?", opts: ["WHERE can use aggregate functions; HAVING cannot", "WHERE filters rows before grouping; HAVING filters groups after GROUP BY", "HAVING executes before FROM", "There is no difference; they are synonyms"], ans: 1, exp: "WHERE filters individual rows prior to GROUP BY; HAVING filters grouped rows after aggregate functions are evaluated." },
-  { id: 18, mod: "M7", modName: "Module 7: Subqueries", q: "What is the maximum number of nested subquery levels allowed in a WHERE clause in Oracle?", opts: ["32 levels", "64 levels", "128 levels", "255 levels"], ans: 3, exp: "Oracle allows up to 255 levels of nested subqueries inside a WHERE clause." },
-  { id: 19, mod: "M7", modName: "Module 7: Subqueries", q: "What happens if a subquery used with the '=' operator returns more than one row?", opts: ["Oracle compares against the first row only", "Oracle raises a single-row subquery returns more than one row error", "Oracle automatically switches '=' to 'IN'", "Oracle returns zero rows silently"], ans: 1, exp: "Single-row comparison operators (=, >, <) fail if multiple rows are returned; multi-row operators like IN or ANY must be used." },
-  { id: 20, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "If EMPLOYEE has 6 rows and DEPARTMENT has 6 rows, how many rows does 'SELECT * FROM employee CROSS JOIN department' return?", opts: ["6 rows", "12 rows", "36 rows", "0 rows"], ans: 2, exp: "A Cross Join produces a Cartesian product of m x n rows (6 x 6 = 36 rows)." },
-  { id: 21, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "Why does 'SELECT * FROM employee e JOIN department d USING (d.dept_id)' raise ORA-01748?", opts: ["USING is not supported in Oracle", "Oracle requires simple, unqualified column names inside USING()", "dept_id must be a primary key in both tables", "USING only works with OUTER joins"], ans: 1, exp: "ORA-01748 occurs because the USING clause forbids table names or aliases; it must be written as USING (dept_id)." },
-  { id: 22, mod: "M8", modName: "Module 8: Joins & USING Clause", q: "Which join returns all rows from both tables, including unmatched employees and departments with no employees?", opts: ["INNER JOIN", "LEFT OUTER JOIN", "RIGHT OUTER JOIN", "FULL OUTER JOIN"], ans: 3, exp: "FULL OUTER JOIN combines the behavior of both left and right outer joins, preserving all matching and non-matching rows from both sides." },
-  { id: 23, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "In an AFTER DELETE row-level trigger, what are the values of the :OLD and :NEW qualifiers?", opts: ["Both :OLD and :NEW hold the deleted row values", ":OLD holds the deleted values; :NEW is NULL", ":NEW holds the deleted values; :OLD is NULL", "Both :OLD and :NEW are NULL"], ans: 1, exp: "During a DELETE operation, :OLD contains the values prior to deletion, while :NEW is NULL because no new row exists." },
-  { id: 24, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "Which explicit cursor attribute returns TRUE if the most recent FETCH statement failed to return a row?", opts: ["%FOUND", "%NOTFOUND", "%ISOPEN", "%ROWCOUNT"], ans: 1, exp: "%NOTFOUND evaluates to TRUE when a FETCH finds no more rows, commonly used as the EXIT WHEN condition in loops." },
-  { id: 25, mod: "M9", modName: "Module 9: Triggers, Cursors & Assertions", q: "How are multi-table global assertions enforced in Oracle Database since CREATE ASSERTION is not supported?", opts: ["Using DEFAULT constraints", "Using Database Triggers (or Materialized Views with Constraints)", "Using the RENAME command", "Using DUAL table constraints"], ans: 1, exp: "Oracle does not support CREATE ASSERTION; single-table rules use CHECK constraints and multi-table rules use Triggers." }
+  {
+    "id": 1,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Which of the following represents the correct logical execution order of clauses in Oracle SQL?",
+    "opts": [
+      "SELECT -> FROM -> WHERE -> GROUP BY -> HAVING -> ORDER BY",
+      "FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY",
+      "FROM -> GROUP BY -> WHERE -> HAVING -> SELECT -> ORDER BY",
+      "SELECT -> WHERE -> FROM -> GROUP BY -> HAVING -> ORDER BY"
+    ],
+    "ans": 1,
+    "exp": "While we write SELECT first, Oracle logically executes FROM first, followed by WHERE, GROUP BY, HAVING, SELECT, and finally ORDER BY."
+  },
+  {
+    "id": 2,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "What is the maximum character length allowed for unquoted table or column identifiers in Oracle 12.2 and later?",
+    "opts": [
+      "30 characters",
+      "64 characters",
+      "128 characters",
+      "255 characters"
+    ],
+    "ans": 2,
+    "exp": "Oracle increased the maximum identifier length from 30 characters (pre-12.2) to 128 characters in Oracle 12.2 and later."
+  },
+  {
+    "id": 3,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Why does the condition 'WHERE salary = NULL' fail to return rows with missing salaries in Oracle?",
+    "opts": [
+      "NULL is treated as 0 in numeric columns",
+      "NULL is not equal to anything, not even another NULL",
+      "NULL requires single quotes ('NULL')",
+      "= NULL is only valid in PL/SQL"
+    ],
+    "ans": 1,
+    "exp": "In Oracle SQL, NULL represents an unknown/missing value and cannot be compared with '=' or '!='; you must use IS NULL or IS NOT NULL."
+  },
+  {
+    "id": 4,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "What was the original name of SQL when initially developed by IBM scientists Donald Chamberlin and Raymond Boyce in the 1970s?",
+    "opts": [
+      "SEQUEL",
+      "QUEL",
+      "ORACLE-QL",
+      "ALPHA"
+    ],
+    "ans": 0,
+    "exp": "SQL was initially named Structured English Query Language (SEQUEL) before being shortened to SQL."
+  },
+  {
+    "id": 5,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Which company name did Oracle Corporation originally start under in 1977 before releasing Oracle Version 2?",
+    "opts": [
+      "Relational Systems Inc.",
+      "Software Development Laboratories (SDL)",
+      "IBM Research Labs",
+      "Sun Microsystems"
+    ],
+    "ans": 1,
+    "exp": "Larry Ellison, Bob Miner, and Ed Oates founded Software Development Laboratories (SDL) in 1977, which later became Oracle Corporation."
+  },
+  {
+    "id": 6,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "In an Oracle SQL statement, what is the difference between a Literal and Data?",
+    "opts": [
+      "Literals are table names; Data are column names",
+      "A literal is the fixed value typed in a query; Data is what gets stored permanently in the table",
+      "Literals are only numeric; Data are only strings",
+      "There is no difference between them"
+    ],
+    "ans": 1,
+    "exp": "A literal is a fixed value written directly in SQL (like 'Amit' or 6000), which Oracle converts and stores permanently as data."
+  },
+  {
+    "id": 7,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "What is the maximum number of columns permitted in a single Oracle table?",
+    "opts": [
+      "255 columns",
+      "512 columns",
+      "1000 columns",
+      "4096 columns"
+    ],
+    "ans": 2,
+    "exp": "An Oracle table must have at least 1 column and can have a maximum of 1000 columns."
+  },
+  {
+    "id": 8,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Which special characters are permitted inside an unquoted Oracle identifier name?",
+    "opts": [
+      "Hyphen (-), At (@), and Space",
+      "Underscore (_), Hash (#), and Dollar sign ($)",
+      "Percent (%), Ampersand (&), and Asterisk (*)",
+      "Period (.), Comma (,), and Colon (:)"
+    ],
+    "ans": 1,
+    "exp": "Unquoted Oracle identifiers must start with a letter and can contain letters, numbers, '_', '#', and '$'."
+  },
+  {
+    "id": 9,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "How do you include a literal single quote inside a string literal in Oracle SQL (such as Don't)?",
+    "opts": [
+      "Using a backslash: 'Don\\'t'",
+      "Using two consecutive single quotes: 'Don''t'",
+      "Using double quotes: \"Don't\"",
+      "Using forward slash: 'Don/'t'"
+    ],
+    "ans": 1,
+    "exp": "Oracle escapes a single quote inside a string literal by writing two single quotes together ('Don''t')."
+  },
+  {
+    "id": 10,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Why is SQL classified as a declarative (nonprocedural) language?",
+    "opts": [
+      "It requires step-by-step memory pointers",
+      "It focuses on WHAT data to retrieve/manipulate rather than HOW to compute it",
+      "It can only run inside C++ programs",
+      "It does not support conditional logic"
+    ],
+    "ans": 1,
+    "exp": "SQL is declarative because the user specifies what result is desired, while the RDBMS optimizer determines how to execute it."
+  },
+  {
+    "id": 11,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "Which Oracle-specific pseudo-column represents the sequential row number of records returned by a query?",
+    "opts": [
+      "ROWID",
+      "ROWNUM",
+      "LEVEL",
+      "SYSDATE"
+    ],
+    "ans": 1,
+    "exp": "ROWNUM is an Oracle-specific feature that assigns a sequential number to rows returned by a query."
+  },
+  {
+    "id": 12,
+    "mod": "M1",
+    "modName": "Module 1: DBMS & SQL Basics",
+    "q": "How many LONG or LONG RAW columns are allowed in a single Oracle table?",
+    "opts": [
+      "Zero",
+      "Only one",
+      "Up to 10",
+      "Unlimited"
+    ],
+    "ans": 1,
+    "exp": "Oracle restricts a table to having at most one LONG or LONG RAW column."
+  },
+  {
+    "id": 13,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "How do CHAR(10) and VARCHAR2(10) differ when storing the 4-character string 'AJAY'?",
+    "opts": [
+      "Both store 4 bytes without padding",
+      "CHAR(10) pads with 6 trailing spaces; VARCHAR2(10) uses 4 bytes",
+      "VARCHAR2(10) pads with spaces; CHAR(10) truncates",
+      "CHAR(10) allows up to 4000 bytes; VARCHAR2(10) allows 2000 bytes"
+    ],
+    "ans": 1,
+    "exp": "CHAR right-pads shorter strings with spaces to its fixed length (up to 2000 bytes), whereas VARCHAR2 stores variable lengths (up to 4000 bytes) without padding."
+  },
+  {
+    "id": 14,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "How does Oracle internally store an INTEGER column, and what value is stored if 12.5 is inserted?",
+    "opts": [
+      "BINARY_INTEGER; stores 12",
+      "NUMBER(38, 0); rounds to 13",
+      "NUMBER(10, 2); stores 12.50",
+      "Raises an ORA-01722 invalid number error"
+    ],
+    "ans": 1,
+    "exp": "Oracle converts ANSI INTEGER to NUMBER(38, 0) and rounds fractional values (12.5 rounds to 13)."
+  },
+  {
+    "id": 15,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "What is the fixed storage size of Oracle's DATE data type and what components does it store?",
+    "opts": [
+      "4 bytes; Year, Month, Day only",
+      "7 bytes; Century, Year, Month, Day, Hour, Minute, Second",
+      "8 bytes; Date, Time, and Time Zone",
+      "11 bytes; Date, Time, and Fractional Seconds"
+    ],
+    "ans": 1,
+    "exp": "Oracle DATE uses a fixed 7-byte format storing Century, Year, Month, Day, Hour, Minute, and Second."
+  },
+  {
+    "id": 16,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "What is the valid range for Precision (p) in Oracle's NUMBER(p, s) data type?",
+    "opts": [
+      "1 to 20",
+      "1 to 38",
+      "0 to 127",
+      "1 to 255"
+    ],
+    "ans": 1,
+    "exp": "In NUMBER(p, s), precision p can range from 1 to 38 total significant digits."
+  },
+  {
+    "id": 17,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "What is the valid range for Scale (s) in Oracle's NUMBER(p, s) data type?",
+    "opts": [
+      "0 to 38",
+      "-84 to 127",
+      "1 to 100",
+      "-38 to 38"
+    ],
+    "ans": 1,
+    "exp": "Scale (s) in Oracle NUMBER(p, s) ranges from -84 to 127."
+  },
+  {
+    "id": 18,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "What does a negative scale (s < 0) in NUMBER(p, s) do to numeric values?",
+    "opts": [
+      "Raises an invalid scale error",
+      "Rounds digits to the left of the decimal point",
+      "Stores negative numbers only",
+      "Adds trailing zeros after the decimal"
+    ],
+    "ans": 1,
+    "exp": "A negative scale rounds numbers to the left of the decimal point (e.g., NUMBER(5, -2) rounds to the nearest hundred)."
+  },
+  {
+    "id": 19,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "Which of the following column definitions is valid in Oracle SQL?",
+    "opts": [
+      "salary NUMBER(, 2)",
+      "salary NUMBER(*, 2)",
+      "name VARCHAR2()",
+      "age CHAR(3000)"
+    ],
+    "ans": 1,
+    "exp": "NUMBER(*, 2) is valid syntax for unspecified precision with 2 decimal places, whereas NUMBER(, 2) and size-less VARCHAR2() are invalid."
+  },
+  {
+    "id": 20,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "What happens if you declare a column as CHAR without specifying a size (e.g., flag CHAR)?",
+    "opts": [
+      "Oracle throws a syntax error because size is mandatory",
+      "Oracle assigns a default and minimum size of 1 byte",
+      "Oracle defaults to 255 bytes",
+      "Oracle treats it as VARCHAR2(4000)"
+    ],
+    "ans": 1,
+    "exp": "For CHAR, size is optional and defaults to 1 byte; for VARCHAR2, size is mandatory."
+  },
+  {
+    "id": 21,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "In Oracle Database, how do VARCHAR and VARCHAR2 compare?",
+    "opts": [
+      "VARCHAR is faster than VARCHAR2",
+      "VARCHAR is ANSI standard and VARCHAR2 is Oracle standard; currently both behave identically in Oracle",
+      "VARCHAR stores numbers and VARCHAR2 stores text",
+      "VARCHAR allows 8000 bytes"
+    ],
+    "ans": 1,
+    "exp": "VARCHAR is the ANSI standard synonym for Oracle's VARCHAR2, though Oracle recommends using VARCHAR2."
+  },
+  {
+    "id": 22,
+    "mod": "M2",
+    "modName": "Module 2: Oracle Data Types",
+    "q": "Does Oracle's DATE data type store fractional seconds or time zone information?",
+    "opts": [
+      "Yes, both fractional seconds and time zone",
+      "No, it provides precision only up to the second without fractional seconds or time zone",
+      "Only time zone, not seconds",
+      "Only fractional seconds"
+    ],
+    "ans": 1,
+    "exp": "Oracle's DATE data type stores precision up to the second and does not include fractional seconds or time zones (which require TIMESTAMP)."
+  },
+  {
+    "id": 23,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "Which two constraints in Oracle can ONLY be defined at the column level and never at the table level?",
+    "opts": [
+      "PRIMARY KEY and UNIQUE",
+      "NOT NULL and DEFAULT",
+      "CHECK and FOREIGN KEY",
+      "UNIQUE and CHECK"
+    ],
+    "ans": 1,
+    "exp": "NOT NULL and DEFAULT are strictly column-level specifications; PRIMARY KEY, UNIQUE, FOREIGN KEY, and CHECK can be declared at either level."
+  },
+  {
+    "id": 24,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "How does Oracle Database treat NULL values in a column with a UNIQUE constraint?",
+    "opts": [
+      "Rejects all NULL values",
+      "Allows at most one NULL value",
+      "Allows multiple NULL values",
+      "Converts NULL to an empty string"
+    ],
+    "ans": 2,
+    "exp": "Because Oracle never considers one NULL equal to another NULL, multiple NULL values are permitted in a UNIQUE column."
+  },
+  {
+    "id": 25,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "In Oracle's USER_CONSTRAINTS view, what constraint type is indicated by the letter 'R'?",
+    "opts": [
+      "Read-Only Constraint",
+      "Row-Level Check",
+      "Foreign Key (Referential Integrity)",
+      "Primary Key"
+    ],
+    "ans": 2,
+    "exp": "In USER_CONSTRAINTS, P = Primary Key, U = Unique, R = Foreign Key (Referential), and C = Check / Not Null."
+  },
+  {
+    "id": 26,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "What is the maximum number of PRIMARY KEY constraints a single table can have in Oracle?",
+    "opts": [
+      "One (single-column or composite)",
+      "Two",
+      "One per column",
+      "Unlimited"
+    ],
+    "ans": 0,
+    "exp": "A table can have only one PRIMARY KEY, though that single primary key may span multiple columns (a Composite Primary Key)."
+  },
+  {
+    "id": 27,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "Which type of constraint in the parent table can a child table's FOREIGN KEY reference?",
+    "opts": [
+      "Any non-null column",
+      "Only a PRIMARY KEY or UNIQUE key column",
+      "Only a CHECK constrained column",
+      "Any indexed column regardless of uniqueness"
+    ],
+    "ans": 1,
+    "exp": "A Foreign Key must reference a PRIMARY KEY or UNIQUE key in the parent table."
+  },
+  {
+    "id": 28,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "What happens when a parent row is deleted if the child foreign key was defined with 'ON DELETE SET NULL'?",
+    "opts": [
+      "The parent delete is blocked with an error",
+      "All matching child rows are deleted automatically",
+      "The foreign key column values in matching child rows are set to NULL",
+      "The child table is dropped"
+    ],
+    "ans": 2,
+    "exp": "ON DELETE SET NULL sets the referencing foreign key column in child records to NULL when the parent record is deleted."
+  },
+  {
+    "id": 29,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "What happens if you explicitly pass NULL into a column that has a DEFAULT value defined (e.g., INSERT INTO emp(id, doj) VALUES (1, NULL))?",
+    "opts": [
+      "Oracle replaces NULL with the DEFAULT value",
+      "Oracle inserts NULL and does NOT apply the DEFAULT value",
+      "Oracle raises a constraint violation error",
+      "Oracle inserts SYSDATE automatically"
+    ],
+    "ans": 1,
+    "exp": "DEFAULT only supplies a value when the column is omitted from the INSERT statement; if NULL is explicitly provided, NULL is stored."
+  },
+  {
+    "id": 30,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "Can you specify a custom CONSTRAINT name for a DEFAULT value clause in Oracle?",
+    "opts": [
+      "Yes, using CONSTRAINT def_name DEFAULT ...",
+      "No, constraint name specification is not allowed for the DEFAULT clause",
+      "Only at the table level",
+      "Only on DATE columns"
+    ],
+    "ans": 1,
+    "exp": "DEFAULT is a column property rather than a named constraint object, so Oracle prohibits naming a DEFAULT clause."
+  },
+  {
+    "id": 31,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "What is the correct sequence when inserting and deleting records across Parent and Child tables linked by a Foreign Key?",
+    "opts": [
+      "Insert into Child first; Delete from Parent first",
+      "Insert into Parent first; Delete from Child first",
+      "Insert and Delete in any order",
+      "Create Child table before Parent table"
+    ],
+    "ans": 1,
+    "exp": "Insert records into the parent table first (so referenced keys exist), and delete from the child table first (to avoid orphaned references)."
+  },
+  {
+    "id": 32,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "In USER_CONSTRAINTS, which single-letter code represents BOTH Check constraints and NOT NULL constraints?",
+    "opts": [
+      "N",
+      "K",
+      "C",
+      "V"
+    ],
+    "ans": 2,
+    "exp": "Oracle uses 'C' in CONSTRAINT_TYPE to represent both CHECK and NOT NULL constraints."
+  },
+  {
+    "id": 33,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "Must a Foreign Key column in the child table have the exact same column name as the referenced column in the parent table?",
+    "opts": [
+      "Yes, both name and size must be identical",
+      "No, column name and size can differ, but the data type must be compatible",
+      "Yes, otherwise ORA-00904 occurs",
+      "Only when using composite keys"
+    ],
+    "ans": 1,
+    "exp": "The child foreign key column must have the same/compatible data type, but its column name and size can be different."
+  },
+  {
+    "id": 34,
+    "mod": "M3",
+    "modName": "Module 3: Integrity & Key Constraints",
+    "q": "How do Key Constraints differ from Integrity Constraints?",
+    "opts": [
+      "Key constraints are broader than integrity constraints",
+      "Key constraints are a subset of integrity constraints focused on row identification and table relationships",
+      "Integrity constraints only apply to views",
+      "Key constraints include CHECK and DEFAULT"
+    ],
+    "ans": 1,
+    "exp": "Key constraints (PRIMARY KEY, UNIQUE, FOREIGN KEY, Composite Key) are a specialized subset of broader Integrity constraints."
+  },
+  {
+    "id": 35,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Which statement accurately distinguishes TRUNCATE from DELETE in Oracle?",
+    "opts": [
+      "TRUNCATE can be rolled back; DELETE cannot",
+      "TRUNCATE is DDL, releases storage space, and auto-commits",
+      "DELETE releases storage space back to the tablespace",
+      "TRUNCATE fires row-level DELETE triggers"
+    ],
+    "ans": 1,
+    "exp": "TRUNCATE is a DDL command that removes all rows rapidly, deallocates storage space, and issues an implicit COMMIT."
+  },
+  {
+    "id": 36,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Which of the following database objects CANNOT be directly renamed using the Oracle RENAME statement?",
+    "opts": [
+      "Table",
+      "View",
+      "Sequence",
+      "Trigger or Stored Procedure"
+    ],
+    "ans": 3,
+    "exp": "RENAME works on tables, views, sequences, synonyms, and private database links, but procedures, functions, packages, and triggers must be recreated."
+  },
+  {
+    "id": 37,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "What does the NOVALIDATE option do when enabling or adding a constraint via ALTER TABLE?",
+    "opts": [
+      "Disables the constraint permanently",
+      "Enforces the constraint on future DML without checking existing rows",
+      "Deletes existing rows that violate the constraint",
+      "Drops dependent foreign keys automatically"
+    ],
+    "ans": 1,
+    "exp": "ENABLE NOVALIDATE activates the rule for new/updated rows immediately without scanning or failing on pre-existing data."
+  },
+  {
+    "id": 38,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Which five commands belong to Data Definition Language (DDL) in Oracle SQL?",
+    "opts": [
+      "SELECT, INSERT, UPDATE, DELETE, MERGE",
+      "CREATE, ALTER, RENAME, TRUNCATE, DROP",
+      "GRANT, REVOKE, COMMIT, ROLLBACK, SAVEPOINT",
+      "DECLARE, OPEN, FETCH, CLOSE, EXIT"
+    ],
+    "ans": 1,
+    "exp": "CREATE, ALTER, RENAME, TRUNCATE, and DROP are the five DDL commands; all of them auto-commit."
+  },
+  {
+    "id": 39,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Which SQL subdivision includes GRANT and REVOKE?",
+    "opts": [
+      "DDL",
+      "DML",
+      "DCL (Data Control Language)",
+      "TCL (Transaction Control Language)"
+    ],
+    "ans": 2,
+    "exp": "DCL (Data Control Language) controls user privileges and access via GRANT and REVOKE."
+  },
+  {
+    "id": 40,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "What is the correct Oracle syntax for the standalone RENAME statement?",
+    "opts": [
+      "RENAME TABLE old_name TO new_name;",
+      "RENAME old_name TO new_name;",
+      "RENAME old_name AS new_name;",
+      "MODIFY TABLE old_name RENAME new_name;"
+    ],
+    "ans": 1,
+    "exp": "Do not use the TABLE keyword in the standalone RENAME statement (use RENAME old_name TO new_name;)."
+  },
+  {
+    "id": 41,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "How do you add a NOT NULL constraint to a new column on an already populated table without failing on existing NULLs?",
+    "opts": [
+      "ALTER TABLE t ADD col VARCHAR2(20) NOT NULL;",
+      "First ADD the column without constraint, then MODIFY it with NOT NULL NOVALIDATE",
+      "Use TRUNCATE before adding the column",
+      "Use RENAME COLUMN with NOT NULL"
+    ],
+    "ans": 1,
+    "exp": "Add the column first without NOT NULL, then apply 'ALTER TABLE t MODIFY col NOT NULL NOVALIDATE;'."
+  },
+  {
+    "id": 42,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "What clause is required when dropping a parent table's PRIMARY KEY that is currently referenced by a child table's FOREIGN KEY?",
+    "opts": [
+      "NOVALIDATE",
+      "CASCADE",
+      "FORCE",
+      "SET NULL"
+    ],
+    "ans": 1,
+    "exp": "Use 'ALTER TABLE parent DROP PRIMARY KEY CASCADE;' to drop the primary key along with dependent foreign keys."
+  },
+  {
+    "id": 43,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Can you rename multiple columns in a single 'ALTER TABLE ... RENAME COLUMN' command in Oracle?",
+    "opts": [
+      "Yes, separated by commas",
+      "No, Oracle only allows renaming one column per RENAME COLUMN clause",
+      "Yes, using parentheses",
+      "Only if the table is empty"
+    ],
+    "ans": 1,
+    "exp": "Oracle's RENAME COLUMN syntax renames only one column at a time."
+  },
+  {
+    "id": 44,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "How do you remove a DEFAULT value from an existing column in Oracle?",
+    "opts": [
+      "ALTER TABLE student DROP DEFAULT age;",
+      "ALTER TABLE student MODIFY age DEFAULT NULL;",
+      "ALTER TABLE student REMOVE CONSTRAINT default;",
+      "ALTER TABLE student DISABLE DEFAULT age;"
+    ],
+    "ans": 1,
+    "exp": "Setting 'MODIFY column_name DEFAULT NULL' removes the previous default value assignment."
+  },
+  {
+    "id": 45,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "What happens if you try to disable a PRIMARY KEY in a parent table while a child table's FOREIGN KEY referencing it is still enabled?",
+    "opts": [
+      "Oracle disables both automatically",
+      "Oracle rejects the operation until the child foreign key is disabled first",
+      "Oracle deletes all child rows",
+      "Oracle converts the primary key to UNIQUE"
+    ],
+    "ans": 1,
+    "exp": "To disable a primary key in a parent table, you must first disable the referencing foreign key in the child table."
+  },
+  {
+    "id": 46,
+    "mod": "M4",
+    "modName": "Module 4: DDL Commands",
+    "q": "Which privilege is required when enabling a PRIMARY KEY or UNIQUE constraint on a table?",
+    "opts": [
+      "CREATE VIEW privilege",
+      "Privilege to create an index on the table",
+      "CREATE TRIGGER privilege",
+      "SYSDBA privilege"
+    ],
+    "ans": 1,
+    "exp": "Oracle automatically creates or uses an index to enforce PRIMARY KEY and UNIQUE constraints, requiring index creation privileges."
+  },
+  {
+    "id": 47,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "Why does Oracle never guarantee the display order of rows from 'SELECT * FROM employee' without an ORDER BY clause?",
+    "opts": [
+      "Oracle sorts rows alphabetically by primary key automatically",
+      "Oracle stores rows in an unordered heap and reuses space from deleted rows",
+      "SELECT * randomizes output for security",
+      "Rows are ordered by column size"
+    ],
+    "ans": 1,
+    "exp": "Oracle uses an unordered heap structure and fills gaps left by deleted records, so ORDER BY is mandatory for guaranteed sorting."
+  },
+  {
+    "id": 48,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "What is the difference between '&var' and ':var' in Oracle environments?",
+    "opts": [
+      "&var is a SQL*Plus substitution variable; :var is a bind variable",
+      "&var is for numbers; :var is only for strings",
+      ":var is used in SQL*Plus; &var is used in PL/SQL triggers",
+      "Both are identical DDL commands"
+    ],
+    "ans": 0,
+    "exp": "Ampersand (&) denotes a SQL*Plus substitution variable, whereas colon (:) denotes a bind variable used in Oracle Live SQL and SQL Developer."
+  },
+  {
+    "id": 49,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "In SQL*Plus, what does entering a single forward slash '/' on a new line do?",
+    "opts": [
+      "Comments out the previous line",
+      "Re-executes the previously executed SQL statement",
+      "Commits the current transaction",
+      "Exits SQL*Plus"
+    ],
+    "ans": 1,
+    "exp": "The '/' command in SQL*Plus re-runs the SQL statement currently in the buffer."
+  },
+  {
+    "id": 50,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "Which table is used at the end of an 'INSERT ALL' statement in Oracle 12c+ when inserting static literal rows?",
+    "opts": [
+      "USER_TABLES",
+      "DUAL",
+      "SYS_OBJECTS",
+      "EMP_TEMP"
+    ],
+    "ans": 1,
+    "exp": "INSERT ALL requires a subquery at the end, typically 'SELECT * FROM dual;' when inserting literal values."
+  },
+  {
+    "id": 51,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "From which Oracle Database version was multi-row VALUES syntax 'INSERT INTO t VALUES (...), (...);' introduced?",
+    "opts": [
+      "Oracle 9i",
+      "Oracle 11g",
+      "Oracle 19c",
+      "Oracle 23 (23c/23ai)"
+    ],
+    "ans": 3,
+    "exp": "Multi-row VALUES constructor syntax in a single INSERT statement was introduced in Oracle 23."
+  },
+  {
+    "id": 52,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "What happens if you execute 'UPDATE employee SET salary = salary * 1.1;' without a WHERE clause?",
+    "opts": [
+      "Oracle throws a missing WHERE clause error",
+      "Every row in the employee table has its salary increased by 10%",
+      "Only the first row is updated",
+      "No rows are updated"
+    ],
+    "ans": 1,
+    "exp": "Omitting the WHERE clause in an UPDATE statement applies the modification to all rows in the table."
+  },
+  {
+    "id": 53,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "What happens when you insert a row specifying only a subset of columns in 'INSERT INTO students (enr_no, name) VALUES (...)'?",
+    "opts": [
+      "Oracle rejects the insert unless all columns are listed",
+      "Omitted columns receive their DEFAULT value if defined, otherwise NULL",
+      "Omitted numeric columns default to 0 automatically",
+      "Omitted columns copy values from the previous row"
+    ],
+    "ans": 1,
+    "exp": "Unspecified columns take their DEFAULT value if configured, or NULL if nullable."
+  },
+  {
+    "id": 54,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "Which statement creates a quick backup copy of an existing table along with all its data in Oracle?",
+    "opts": [
+      "BACKUP TABLE employee TO employee_backup;",
+      "CREATE TABLE employee_backup AS SELECT * FROM employee;",
+      "COPY employee INTO employee_backup;",
+      "INSERT INTO employee_backup FROM employee;"
+    ],
+    "ans": 1,
+    "exp": "CTAS (CREATE TABLE ... AS SELECT * FROM ...) creates a new table populated with the queried data."
+  },
+  {
+    "id": 55,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "Which TCL command undoes uncommitted DML operations (INSERT, UPDATE, DELETE)?",
+    "opts": [
+      "TRUNCATE",
+      "ROLLBACK",
+      "REVOKE",
+      "DROP"
+    ],
+    "ans": 1,
+    "exp": "ROLLBACK reverts uncommitted DML changes in the current transaction."
+  },
+  {
+    "id": 56,
+    "mod": "M5",
+    "modName": "Module 5: DML & Variables",
+    "q": "Can the column order in 'INSERT INTO table_name (colB, colA) VALUES (valB, valA)' differ from the table's CREATE TABLE column order?",
+    "opts": [
+      "No, it must always match CREATE TABLE order",
+      "Yes, as long as the VALUES list matches the specified column list order",
+      "Only for VARCHAR2 columns",
+      "Only when inserting into views"
+    ],
+    "ans": 1,
+    "exp": "When column names are explicitly listed, Oracle maps values according to the order in the INSERT column list."
+  },
+  {
+    "id": 57,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Which statement accurately describes Oracle's built-in DUAL table?",
+    "opts": [
+      "It has two columns and zero rows",
+      "It has one VARCHAR2(1) column named DUMMY with one row containing 'X'",
+      "It stores all user table metadata",
+      "It is a temporary table created per session"
+    ],
+    "ans": 1,
+    "exp": "DUAL contains a single column DUMMY VARCHAR2(1) and a single row 'X', used for evaluating expressions and functions."
+  },
+  {
+    "id": 58,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "How do Oracle aggregate functions (SUM, AVG, MIN, MAX, COUNT) handle NULL values?",
+    "opts": [
+      "All aggregate functions treat NULL as 0",
+      "All ignore NULL values except COUNT(*), which counts all rows",
+      "All return NULL if any row in the column is NULL",
+      "COUNT(column_name) includes NULLs while COUNT(*) ignores them"
+    ],
+    "ans": 1,
+    "exp": "Aggregate functions ignore NULLs in column arguments, whereas COUNT(*) counts every row regardless of NULLs."
+  },
+  {
+    "id": 59,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "What is the key difference between the WHERE clause and the HAVING clause?",
+    "opts": [
+      "WHERE can use aggregate functions; HAVING cannot",
+      "WHERE filters rows before grouping; HAVING filters groups after GROUP BY",
+      "HAVING executes before FROM",
+      "There is no difference; they are synonyms"
+    ],
+    "ans": 1,
+    "exp": "WHERE filters individual rows prior to GROUP BY; HAVING filters grouped rows after aggregate functions are evaluated."
+  },
+  {
+    "id": 60,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Which LIKE pattern matches a city name starting with 'B' that is exactly 6 characters long?",
+    "opts": [
+      "LIKE 'B%6'",
+      "LIKE 'B_____' (B followed by 5 underscores)",
+      "LIKE 'B______' (B followed by 6 underscores)",
+      "LIKE '_B____'"
+    ],
+    "ans": 1,
+    "exp": "'B' (1 char) + 5 underscores ('_____', 5 chars) matches any string starting with 'B' of total length 6."
+  },
+  {
+    "id": 61,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "When should a column alias in a SELECT list be enclosed in double quotation marks (\"\")?",
+    "opts": [
+      "Always, for every alias",
+      "When the alias contains spaces, special characters, or needs exact case preservation",
+      "When aliasing numeric columns",
+      "Whenever the AS keyword is omitted"
+    ],
+    "ans": 1,
+    "exp": "Double quotes are required around column aliases that contain spaces or special characters (e.g., AS \"Monthly Salary\")."
+  },
+  {
+    "id": 62,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "How does 'SELECT DISTINCT dept_id, city FROM employee;' evaluate duplicates?",
+    "opts": [
+      "Checks distinctness on dept_id only",
+      "Checks distinctness on the combined pair of (dept_id, city)",
+      "Raises an error because DISTINCT only accepts one column",
+      "Sorts results alphabetically by city"
+    ],
+    "ans": 1,
+    "exp": "DISTINCT applies to the entire combination of columns listed in the SELECT clause."
+  },
+  {
+    "id": 63,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Which two operators represent 'Not Equal To' in Oracle SQL?",
+    "opts": [
+      "!= and <>",
+      "~= and =!",
+      "NOT= and ><",
+      "=/= and <>"
+    ],
+    "ans": 0,
+    "exp": "Both '!=' and '<>' are standard comparison operators for inequality in Oracle SQL."
+  },
+  {
+    "id": 64,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Is the BETWEEN operator inclusive or exclusive of its boundary values (e.g., salary BETWEEN 40000 AND 60000)?",
+    "opts": [
+      "Inclusive of both 40000 and 60000",
+      "Exclusive of both boundaries",
+      "Inclusive of 40000 only",
+      "Inclusive of 60000 only"
+    ],
+    "ans": 0,
+    "exp": "BETWEEN is inclusive: it is equivalent to 'salary >= 40000 AND salary <= 60000'."
+  },
+  {
+    "id": 65,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Which function or pseudo-column returns the currently logged-in database username when queried from DUAL?",
+    "opts": [
+      "SELECT CURRENT_ID FROM dual;",
+      "SELECT USER FROM dual;",
+      "SELECT WHOAMI FROM dual;",
+      "SELECT SESSION_NAME FROM dual;"
+    ],
+    "ans": 1,
+    "exp": "'SELECT USER FROM dual;' returns the active database schema/username."
+  },
+  {
+    "id": 66,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "Which LIKE pattern finds employees whose name has 'a' as the second character?",
+    "opts": [
+      "LIKE '%a%'",
+      "LIKE '_a%'",
+      "LIKE 'a_%'",
+      "LIKE '__a%'"
+    ],
+    "ans": 1,
+    "exp": "One underscore '_' skips the first character, 'a' matches the second character, and '%' matches the rest."
+  },
+  {
+    "id": 67,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "What is the default sort direction of the ORDER BY clause if ASC or DESC is not specified?",
+    "opts": [
+      "Descending (DESC)",
+      "Ascending (ASC)",
+      "Random order",
+      "Insertion order"
+    ],
+    "ans": 1,
+    "exp": "ORDER BY defaults to Ascending (ASC) order."
+  },
+  {
+    "id": 68,
+    "mod": "M6",
+    "modName": "Module 6: DQL, DUAL & Aggregates",
+    "q": "What happens if a SELECT list contains both a regular non-aggregated column and an aggregate function without a GROUP BY clause?",
+    "opts": [
+      "Oracle groups by the first column automatically",
+      "Oracle raises ORA-00937: not a single-group group function",
+      "Oracle ignores the non-aggregated column",
+      "Oracle returns only the first row"
+    ],
+    "ans": 1,
+    "exp": "Every non-aggregated column in the SELECT list must appear in the GROUP BY clause."
+  },
+  {
+    "id": 69,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "What is the maximum number of nested subquery levels allowed in a WHERE clause in Oracle?",
+    "opts": [
+      "32 levels",
+      "64 levels",
+      "128 levels",
+      "255 levels"
+    ],
+    "ans": 3,
+    "exp": "Oracle allows up to 255 levels of nested subqueries inside a WHERE clause."
+  },
+  {
+    "id": 70,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "What happens if a subquery used with the '=' operator returns more than one row?",
+    "opts": [
+      "Oracle compares against the first row only",
+      "Oracle raises a single-row subquery returns more than one row error",
+      "Oracle automatically switches '=' to 'IN'",
+      "Oracle returns zero rows silently"
+    ],
+    "ans": 1,
+    "exp": "Single-row comparison operators (=, >, <) fail if multiple rows are returned; multi-row operators like IN or ANY must be used."
+  },
+  {
+    "id": 71,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "Can an ORDER BY clause be used directly inside a standard WHERE-clause subquery in Oracle?",
+    "opts": [
+      "Yes, always",
+      "No, ORDER BY cannot be used in a standard subquery (unless inside an inline view)",
+      "Only with DESC",
+      "Only when using IN"
+    ],
+    "ans": 1,
+    "exp": "Oracle prohibits ORDER BY inside standard subqueries because inner result order is irrelevant to outer filtering."
+  },
+  {
+    "id": 72,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "Can the outer query's SELECT clause directly reference a column defined exclusively inside the inner subquery?",
+    "opts": [
+      "Yes, automatically",
+      "No, columns defined exclusively in the inner query cannot be referenced by the outer query",
+      "Yes, if aliased",
+      "Only for numeric columns"
+    ],
+    "ans": 1,
+    "exp": "Inner subquery columns are scoped to the inner query and are not visible in the outer query's SELECT list."
+  },
+  {
+    "id": 73,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "Which query correctly finds the second highest salary in the EMPLOYEE table using a subquery?",
+    "opts": [
+      "SELECT MIN(salary) FROM employee WHERE salary < (SELECT MAX(salary) FROM employee);",
+      "SELECT MAX(salary) FROM employee WHERE salary < (SELECT MAX(salary) FROM employee);",
+      "SELECT salary FROM employee WHERE salary = MAX(salary) - 1;",
+      "SELECT MAX(salary) FROM employee HAVING salary < MAX(salary);"
+    ],
+    "ans": 1,
+    "exp": "The inner query finds the highest salary, and the outer query finds the maximum among all salaries strictly less than that highest value."
+  },
+  {
+    "id": 74,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "Which multi-row operator is equivalent to '= ANY (...)' in Oracle SQL?",
+    "opts": [
+      "ALL",
+      "IN",
+      "BETWEEN",
+      "EXISTS"
+    ],
+    "ans": 1,
+    "exp": "'= ANY (subquery)' matches if the value equals any member returned by the subquery, which is identical to 'IN'."
+  },
+  {
+    "id": 75,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "Can subqueries be used inside DML statements such as UPDATE and DELETE in Oracle?",
+    "opts": [
+      "No, subqueries only work in SELECT statements",
+      "Yes, subqueries can be used in the WHERE clause (and SET clause) of UPDATE and DELETE",
+      "Only in DELETE, not UPDATE",
+      "Only in Oracle 23+"
+    ],
+    "ans": 1,
+    "exp": "Subqueries are commonly used in UPDATE and DELETE WHERE conditions to target rows dynamically."
+  },
+  {
+    "id": 76,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "In a non-correlated subquery, which query executes first?",
+    "opts": [
+      "The outer (main) query executes first",
+      "The inner subquery executes first and passes its result to the outer query",
+      "Both execute simultaneously in parallel",
+      "Whichever has fewer columns"
+    ],
+    "ans": 1,
+    "exp": "In standard subqueries, the inner query executes first and supplies its output value(s) to the outer query."
+  },
+  {
+    "id": 77,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "What does 'salary > ALL (SELECT salary FROM employee WHERE dept_id = 'D001')' check?",
+    "opts": [
+      "Salary is greater than at least one employee in D001",
+      "Salary is greater than the highest salary in D001",
+      "Salary is equal to all salaries in D001",
+      "Salary is less than the lowest salary in D001"
+    ],
+    "ans": 1,
+    "exp": "'> ALL' requires the value to exceed every single value returned by the subquery (i.e., greater than the maximum)."
+  },
+  {
+    "id": 78,
+    "mod": "M7",
+    "modName": "Module 7: Subqueries",
+    "q": "What happens if a subquery used with 'NOT IN' returns a NULL value in its result set?",
+    "opts": [
+      "NULL is ignored and matching rows are returned",
+      "The entire outer query returns zero rows",
+      "Oracle throws ORA-01427",
+      "NULL is treated as 0"
+    ],
+    "ans": 1,
+    "exp": "Because 'x != NULL' evaluates to UNKNOWN, 'NOT IN' with a NULL in the subquery list evaluates to no rows returned."
+  },
+  {
+    "id": 79,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "If EMPLOYEE has 6 rows and DEPARTMENT has 6 rows, how many rows does 'SELECT * FROM employee CROSS JOIN department' return?",
+    "opts": [
+      "6 rows",
+      "12 rows",
+      "36 rows",
+      "0 rows"
+    ],
+    "ans": 2,
+    "exp": "A Cross Join produces a Cartesian product of m x n rows (6 x 6 = 36 rows)."
+  },
+  {
+    "id": 80,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "Why does 'SELECT * FROM employee e JOIN department d USING (d.dept_id)' raise ORA-01748?",
+    "opts": [
+      "USING is not supported in Oracle",
+      "Oracle requires simple, unqualified column names inside USING()",
+      "dept_id must be a primary key in both tables",
+      "USING only works with OUTER joins"
+    ],
+    "ans": 1,
+    "exp": "ORA-01748 occurs because the USING clause forbids table names or aliases; it must be written as USING (dept_id)."
+  },
+  {
+    "id": 81,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "Which join returns all rows from both tables, including unmatched employees and departments with no employees?",
+    "opts": [
+      "INNER JOIN",
+      "LEFT OUTER JOIN",
+      "RIGHT OUTER JOIN",
+      "FULL OUTER JOIN"
+    ],
+    "ans": 3,
+    "exp": "FULL OUTER JOIN combines the behavior of both left and right outer joins, preserving all matching and non-matching rows from both sides."
+  },
+  {
+    "id": 82,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "How many times does the common join column appear in the output of 'SELECT * FROM employee JOIN department USING (dept_id)'?",
+    "opts": [
+      "Twice (once from each table)",
+      "Only once",
+      "Zero times",
+      "Three times"
+    ],
+    "ans": 1,
+    "exp": "Unlike 'ON e.dept_id = d.dept_id' which displays dept_id twice, 'USING (dept_id)' merges and displays the common column only once."
+  },
+  {
+    "id": 83,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "What is a Self Join?",
+    "opts": [
+      "Joining a table to a backup copy",
+      "Joining a table to itself using two distinct table aliases in the FROM clause",
+      "A join without any ON condition",
+      "A join between two views"
+    ],
+    "ans": 1,
+    "exp": "A Self Join references the same table twice with distinct aliases (e.g., employee e and employee m) to query hierarchical data like employee-manager pairs."
+  },
+  {
+    "id": 84,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "In 'SELECT * FROM employee e LEFT OUTER JOIN department d ON e.dept_id = d.dept_id', what appears in department columns for an employee with NULL dept_id?",
+    "opts": [
+      "The employee row is excluded",
+      "Department columns are filled with NULL values",
+      "Default department 'D001' is shown",
+      "Oracle raises an error"
+    ],
+    "ans": 1,
+    "exp": "LEFT OUTER JOIN retains all rows from the left table (EMPLOYEE) and fills unmatched columns from the right table with NULL."
+  },
+  {
+    "id": 85,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "How does a NATURAL JOIN automatically determine the join condition between two tables?",
+    "opts": [
+      "It joins on all columns that have the same name in both tables",
+      "It joins only on Primary Key columns",
+      "It joins on the first column of each table",
+      "It requires an ON clause"
+    ],
+    "ans": 0,
+    "exp": "NATURAL JOIN automatically matches all columns having identical names across both tables."
+  },
+  {
+    "id": 86,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "Which index significantly improves the performance of a Self Join mapping employees (MNGR_ID) to managers (EMP_ID)?",
+    "opts": [
+      "Indexing the parent-referencing foreign key column (MNGR_ID)",
+      "Indexing the CITY column",
+      "Dropping the PRIMARY KEY",
+      "Using a Cross Join instead"
+    ],
+    "ans": 0,
+    "exp": "Self-join performance relies heavily on indexing the parent-referencing foreign key column (MNGR_ID)."
+  },
+  {
+    "id": 87,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "In which Oracle version were ANSI-standard JOIN keywords (INNER JOIN, LEFT OUTER JOIN, etc.) introduced?",
+    "opts": [
+      "Oracle 7",
+      "Oracle 8i",
+      "Oracle 9i",
+      "Oracle 12c"
+    ],
+    "ans": 2,
+    "exp": "Portable ANSI SQL join syntax was introduced in Oracle 9i."
+  },
+  {
+    "id": 88,
+    "mod": "M8",
+    "modName": "Module 8: Joins & USING Clause",
+    "q": "What happens if you qualify the join column with a table alias in the SELECT list when using 'USING (dept_id)' (e.g., SELECT e.dept_id ... USING (dept_id))?",
+    "opts": [
+      "It works normally",
+      "Oracle raises ORA-25154: column part of USING clause cannot have qualifier",
+      "It returns NULL",
+      "It renames the column"
+    ],
+    "ans": 1,
+    "exp": "Columns referenced in a USING clause cannot be prefixed with a table alias anywhere in the query."
+  },
+  {
+    "id": 89,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "In an AFTER DELETE row-level trigger, what are the values of the :OLD and :NEW qualifiers?",
+    "opts": [
+      "Both :OLD and :NEW hold the deleted row values",
+      ":OLD holds the deleted values; :NEW is NULL",
+      ":NEW holds the deleted values; :OLD is NULL",
+      "Both :OLD and :NEW are NULL"
+    ],
+    "ans": 1,
+    "exp": "During a DELETE operation, :OLD contains the values prior to deletion, while :NEW is NULL because no new row exists."
+  },
+  {
+    "id": 90,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which explicit cursor attribute returns TRUE if the most recent FETCH statement failed to return a row?",
+    "opts": [
+      "%FOUND",
+      "%NOTFOUND",
+      "%ISOPEN",
+      "%ROWCOUNT"
+    ],
+    "ans": 1,
+    "exp": "%NOTFOUND evaluates to TRUE when a FETCH finds no more rows, commonly used as the EXIT WHEN condition in loops."
+  },
+  {
+    "id": 91,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "How are multi-table global assertions enforced in Oracle Database since CREATE ASSERTION is not supported?",
+    "opts": [
+      "Using DEFAULT constraints",
+      "Using Database Triggers (or Materialized Views with Constraints)",
+      "Using the RENAME command",
+      "Using DUAL table constraints"
+    ],
+    "ans": 1,
+    "exp": "Oracle does not support CREATE ASSERTION; single-table rules use CHECK constraints and multi-table rules use Triggers."
+  },
+  {
+    "id": 92,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which trigger timing option is specifically designed for views to execute custom PL/SQL code in place of a DML statement?",
+    "opts": [
+      "BEFORE",
+      "AFTER",
+      "INSTEAD OF",
+      "ON VIEW"
+    ],
+    "ans": 2,
+    "exp": "INSTEAD OF triggers are created on views to execute custom DML logic instead of the triggering event."
+  },
+  {
+    "id": 93,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which clause must be included in a trigger definition to access :OLD and :NEW column qualifiers?",
+    "opts": [
+      "FOR EACH STATEMENT",
+      "FOR EACH ROW",
+      "WHEN (ROW)",
+      "DECLARE ROW"
+    ],
+    "ans": 1,
+    "exp": ":OLD and :NEW qualifiers are only valid in row-level triggers declared with 'FOR EACH ROW'."
+  },
+  {
+    "id": 94,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "What is the error number range reserved for user-defined exceptions in Oracle's RAISE_APPLICATION_ERROR procedure?",
+    "opts": [
+      "-1 to -999",
+      "-20000 to -20999",
+      "100 to 500",
+      "-1000 to -9999"
+    ],
+    "ans": 1,
+    "exp": "RAISE_APPLICATION_ERROR uses custom error codes in the -20000 to -20999 range (such as -20001)."
+  },
+  {
+    "id": 95,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which data dictionary view lists all triggers owned by the current user's schema?",
+    "opts": [
+      "ALL_TRIGGERS",
+      "USER_TRIGGERS",
+      "DBA_TRIGGERS",
+      "V$TRIGGER"
+    ],
+    "ans": 1,
+    "exp": "USER_TRIGGERS shows triggers in the current user's schema; ALL_TRIGGERS shows accessible triggers; DBA_TRIGGERS shows all database triggers."
+  },
+  {
+    "id": 96,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "What is the exact sequence of the four manual lifecycle steps for an Explicit Cursor in PL/SQL?",
+    "opts": [
+      "OPEN -> DECLARE -> FETCH -> CLOSE",
+      "DECLARE -> OPEN -> FETCH -> CLOSE",
+      "FETCH -> OPEN -> DECLARE -> CLOSE",
+      "DECLARE -> FETCH -> OPEN -> CLOSE"
+    ],
+    "ans": 1,
+    "exp": "An explicit cursor must be DECLARED, OPENED, FETCHED from in a loop, and finally CLOSED."
+  },
+  {
+    "id": 97,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "What is the name of the Implicit Cursor automatically managed by Oracle for single SQL statements?",
+    "opts": [
+      "IMP",
+      "SQL",
+      "CUR",
+      "SYS_CUR"
+    ],
+    "ans": 1,
+    "exp": "Oracle names its implicit cursor 'SQL', allowing checks like SQL%ROWCOUNT and SQL%FOUND."
+  },
+  {
+    "id": 98,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "What value does SQL%ISOPEN always return for an Implicit Cursor?",
+    "opts": [
+      "TRUE",
+      "FALSE (because Oracle closes implicit cursors immediately after execution)",
+      "NULL",
+      "1"
+    ],
+    "ans": 1,
+    "exp": "Oracle automatically closes implicit cursors right after executing the SQL statement, so SQL%ISOPEN is always FALSE."
+  },
+  {
+    "id": 99,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which PL/SQL loop construct automatically opens, fetches each row into a record variable, and closes an explicit cursor?",
+    "opts": [
+      "WHILE Cursor Loop",
+      "Cursor FOR Loop",
+      "REPEAT Cursor Loop",
+      "Implicit SELECT Loop"
+    ],
+    "ans": 1,
+    "exp": "A Cursor FOR Loop automatically handles OPEN, FETCH, exit when %NOTFOUND, and CLOSE."
+  },
+  {
+    "id": 100,
+    "mod": "M9",
+    "modName": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Which SQL*Plus command must be enabled before running a PL/SQL block to view output printed by DBMS_OUTPUT.PUT_LINE?",
+    "opts": [
+      "SET ECHO ON;",
+      "SET SERVEROUTPUT ON;",
+      "SET FEEDBACK ON;",
+      "ENABLE DBMS_OUTPUT;"
+    ],
+    "ans": 1,
+    "exp": "'SET SERVEROUTPUT ON;' enables displaying buffered DBMS_OUTPUT.PUT_LINE messages in SQL*Plus / SQL Developer."
+  }
 ];
 
-const STORAGE_KEY = 'oracle_mcq_student_results_v1';
+const STORAGE_KEY = 'oracle_mcq_student_results_v2';
+const GAS_URL_KEY = 'oracle_mcq_gas_url_v1';
 let activeQuestions = [];
 let currentIdx = 0;
 let score = 0;
@@ -331,8 +1737,27 @@ let currentStudent = {};
 let timerInterval = null;
 let startTime = null;
 let lastResultRecord = null;
+let cloudResultsCache = null;
+
+function getGasUrl() {
+  return DEFAULT_GAS_URL || localStorage.getItem(GAS_URL_KEY) || '';
+}
+
+function saveGasUrl() {
+  const val = document.getElementById('gas-url-input').value.trim();
+  localStorage.setItem(GAS_URL_KEY, val);
+  alert('Google Apps Script URL saved!');
+  syncFromGoogleSheet();
+}
+
+function toggleConfigBox() {
+  const box = document.getElementById('config-box');
+  box.classList.toggle('hidden');
+  document.getElementById('gas-url-input').value = getGasUrl();
+}
 
 function getSavedResults() {
+  if (cloudResultsCache !== null) return cloudResultsCache;
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
   } catch (e) {
@@ -340,8 +1765,9 @@ function getSavedResults() {
   }
 }
 
-function saveResultRecord(record) {
-  const list = getSavedResults();
+function saveLocalResult(record) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) {}
   list.unshift(record);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
   updateRecordBadge();
@@ -364,7 +1790,19 @@ function showView(viewName) {
     document.getElementById('view-' + v).classList.add('hidden');
   });
   document.getElementById('view-' + viewName).classList.remove('hidden');
-  if (viewName === 'faculty-dashboard') renderFacultyTable();
+  if (viewName === 'faculty-dashboard') {
+    renderFacultyTable();
+    if (getGasUrl()) syncFromGoogleSheet();
+  }
+}
+
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
 function startQuiz() {
@@ -372,6 +1810,7 @@ function startQuiz() {
   const roll = document.getElementById('stu-roll').value.trim();
   const batch = document.getElementById('stu-batch').value.trim() || 'General';
   const mod = document.getElementById('mod-filter').value;
+  const limitVal = document.getElementById('q-limit').value;
   const mins = parseInt(document.getElementById('timer-mode').value, 10);
 
   if (!name || !roll) {
@@ -379,10 +1818,21 @@ function startQuiz() {
     return;
   }
 
-  activeQuestions = mod === 'ALL' ? [...QUESTIONS] : QUESTIONS.filter(q => q.mod === mod);
+  let pool = mod === 'ALL' ? [...QUESTIONS] : QUESTIONS.filter(q => q.mod === mod);
+  if (limitVal !== 'ALL') {
+    const num = parseInt(limitVal, 10);
+    pool = shuffleArray(pool).slice(0, Math.min(num, pool.length));
+  }
+  activeQuestions = pool;
   if (activeQuestions.length === 0) return;
 
-  currentStudent = { name, roll, batch, modLabel: document.getElementById('mod-filter').options[document.getElementById('mod-filter').selectedIndex].text };
+  const modText = document.getElementById('mod-filter').options[document.getElementById('mod-filter').selectedIndex].text;
+  currentStudent = {
+    name,
+    roll,
+    batch,
+    modLabel: limitVal === 'ALL' ? modText : `${modText} [Set of ${activeQuestions.length}]`
+  };
   currentIdx = 0;
   score = 0;
   studentAnswers = [];
@@ -390,7 +1840,7 @@ function startQuiz() {
 
   document.getElementById('q-student-label').textContent = `${name} (${roll})`;
   document.getElementById('live-score').textContent = '0';
-  
+
   clearInterval(timerInterval);
   const timerEl = document.getElementById('timer-display');
   if (mins > 0) {
@@ -423,9 +1873,9 @@ function renderQuestion() {
   const qObj = activeQuestions[currentIdx];
   document.getElementById('q-module-badge').textContent = qObj.modName;
   document.getElementById('q-counter').textContent = `Question ${currentIdx + 1} of ${activeQuestions.length}`;
-  document.getElementById('progress-bar').style.width = `${((currentIdx) / activeQuestions.length) * 100}%`;
+  document.getElementById('progress-bar').style.width = `${(currentIdx / activeQuestions.length) * 100}%`;
   document.getElementById('q-text').textContent = `${currentIdx + 1}. ${qObj.q}`;
-  
+
   const expBox = document.getElementById('explanation-box');
   expBox.style.display = 'none';
   expBox.innerHTML = '';
@@ -484,7 +1934,7 @@ function nextQuestion() {
   }
 }
 
-function finishQuiz() {
+async function finishQuiz() {
   clearInterval(timerInterval);
   const elapsedSec = Math.round((Date.now() - startTime) / 1000);
   const timeStr = `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
@@ -507,7 +1957,7 @@ function finishQuiz() {
     answers: studentAnswers
   };
 
-  saveResultRecord(lastResultRecord);
+  saveLocalResult(lastResultRecord);
 
   document.getElementById('res-student-info').textContent = `${lastResultRecord.name} | Roll No: ${lastResultRecord.roll} | Batch: ${lastResultRecord.batch}`;
   document.getElementById('res-score').textContent = `${score} / ${total}`;
@@ -526,6 +1976,54 @@ function finishQuiz() {
   `).join('');
 
   showView('result');
+  await pushResultToGoogleSheet(lastResultRecord);
+}
+
+async function pushResultToGoogleSheet(record) {
+  const banner = document.getElementById('sync-status-banner');
+  const gasUrl = getGasUrl();
+  if (!gasUrl) {
+    banner.className = 'alert alert-warn';
+    banner.innerHTML = '<strong>Local Mode:</strong> Google Apps Script URL is not configured yet. Click <strong>"Copy Backup Result Code"</strong> above to share your result with your teacher, or configure the Google Sheet URL in Faculty Results.';
+    return;
+  }
+
+  banner.className = 'alert';
+  banner.textContent = 'Submitting your scorecard to Faculty Google Sheet...';
+
+  try {
+    await fetch(gasUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(record)
+    });
+    banner.className = 'alert alert-success';
+    banner.innerHTML = '<strong>Submitted Successfully!</strong> Your marks and answer breakdown have been recorded directly into the Faculty Google Sheet.';
+  } catch (err) {
+    banner.className = 'alert alert-warn';
+    banner.innerHTML = '<strong>Network Warning:</strong> Could not reach Google Sheets automatically. Please click <strong>"Copy Backup Result Code"</strong> above and send it to your teacher.';
+  }
+}
+
+async function syncFromGoogleSheet() {
+  const gasUrl = getGasUrl();
+  if (!gasUrl) {
+    alert('Please configure your Google Apps Script Web App URL in "Google Sheet Settings" first.');
+    return;
+  }
+  try {
+    const resp = await fetch(gasUrl);
+    const data = await resp.json();
+    if (Array.isArray(data)) {
+      cloudResultsCache = data.reverse();
+      updateRecordBadge();
+      renderFacultyTable();
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Unable to fetch rows from Google Sheet. Ensure your Apps Script Web App is deployed with access set to "Anyone".');
+  }
 }
 
 function copyResultCode() {
@@ -544,7 +2042,7 @@ function copyResultCode() {
   };
   const code = 'ORACLE_RES::' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   navigator.clipboard.writeText(code).then(() => {
-    alert('Result Code copied! Share this code with your teacher so they can import your score into the Student-Wise Result Dashboard.');
+    alert('Backup Result Code copied!');
   });
 }
 
@@ -555,7 +2053,8 @@ function toggleImportBox() {
 function importStudentCodes() {
   const raw = document.getElementById('import-code-input').value.trim();
   if (!raw) return;
-  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const lines = raw.split(/?
+/).map(l => l.trim()).filter(Boolean);
   let imported = 0;
   lines.forEach(line => {
     try {
@@ -564,14 +2063,14 @@ function importStudentCodes() {
       if (obj && obj.name && obj.roll && typeof obj.score === 'number') {
         obj.id = 'IMP-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
         obj.answers = obj.answers || [];
-        saveResultRecord(obj);
+        saveLocalResult(obj);
         imported++;
       }
     } catch (e) {}
   });
   document.getElementById('import-code-input').value = '';
   renderFacultyTable();
-  alert(`Successfully imported ${imported} student result(s).`);
+  alert(`Imported ${imported} student result(s).`);
 }
 
 function renderFacultyTable() {
@@ -580,16 +2079,16 @@ function renderFacultyTable() {
   const gradeFilter = document.getElementById('filter-grade').value;
 
   const filtered = all.filter(r => {
-    const matchesSearch = r.name.toLowerCase().includes(query) || r.roll.toLowerCase().includes(query) || (r.batch || '').toLowerCase().includes(query);
+    const matchesSearch = String(r.name).toLowerCase().includes(query) || String(r.roll).toLowerCase().includes(query) || String(r.batch || '').toLowerCase().includes(query);
     const matchesGrade = gradeFilter === 'ALL' || r.grade === gradeFilter;
     return matchesSearch && matchesGrade;
   });
 
   document.getElementById('dash-total').textContent = filtered.length;
   if (filtered.length > 0) {
-    const avg = Math.round(filtered.reduce((acc, r) => acc + r.pct, 0) / filtered.length);
-    const high = Math.max(...filtered.map(r => r.pct));
-    const passCount = filtered.filter(r => r.pct >= 40).length;
+    const avg = Math.round(filtered.reduce((acc, r) => acc + Number(r.pct), 0) / filtered.length);
+    const high = Math.max(...filtered.map(r => Number(r.pct)));
+    const passCount = filtered.filter(r => Number(r.pct) >= 40).length;
     document.getElementById('dash-avg').textContent = avg + '%';
     document.getElementById('dash-high').textContent = high + '%';
     document.getElementById('dash-pass').textContent = Math.round((passCount / filtered.length) * 100) + '%';
@@ -601,12 +2100,13 @@ function renderFacultyTable() {
 
   const tbody = document.getElementById('faculty-tbody');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet. Complete a quiz or click "+ Import Student Result Code" to add student results.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map((r, i) => {
-    const pillClass = r.grade.startsWith('A') ? 'grade-A' : r.grade === 'B' ? 'grade-B' : r.grade === 'C' ? 'grade-C' : 'grade-F';
+    const gradeStr = String(r.grade || 'F');
+    const pillClass = gradeStr.startsWith('A') ? 'grade-A' : gradeStr === 'B' ? 'grade-B' : gradeStr === 'C' ? 'grade-C' : 'grade-F';
     return `
       <tr>
         <td>${i + 1}</td>
@@ -616,7 +2116,7 @@ function renderFacultyTable() {
         <td>${r.module}</td>
         <td><strong>${r.score}/${r.total}</strong></td>
         <td>${r.pct}%</td>
-        <td><span class="grade-pill ${pillClass}">${r.grade}</span></td>
+        <td><span class="grade-pill ${pillClass}">${gradeStr}</span></td>
         <td style="font-size: 0.8rem; color: var(--muted);">${r.timestamp}</td>
         <td><button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="inspectStudent('${r.id}')">View</button></td>
       </tr>
@@ -625,14 +2125,18 @@ function renderFacultyTable() {
 }
 
 function inspectStudent(id) {
-  const rec = getSavedResults().find(r => r.id === id);
+  const rec = getSavedResults().find(r => String(r.id) === String(id));
   if (!rec) return;
   document.getElementById('modal-title').textContent = `${rec.name} (${rec.roll}) — ${rec.score}/${rec.total} (${rec.pct}% | Grade ${rec.grade})`;
   const body = document.getElementById('modal-body');
-  if (!rec.answers || rec.answers.length === 0) {
-    body.innerHTML = `<p style="color: var(--muted);">Summary record imported via Result Code.<br><strong>Batch:</strong> ${rec.batch} | <strong>Module:</strong> ${rec.module} | <strong>Time Taken:</strong> ${rec.timeTaken} | <strong>Submitted:</strong> ${rec.timestamp}</p>`;
+  let ansList = rec.answers;
+  if (typeof ansList === 'string') {
+    try { ansList = JSON.parse(ansList); } catch (e) { ansList = []; }
+  }
+  if (!ansList || ansList.length === 0) {
+    body.innerHTML = `<p style="color: var(--muted);"><strong>Batch:</strong> ${rec.batch} | <strong>Module:</strong> ${rec.module} | <strong>Time Taken:</strong> ${rec.timeTaken} | <strong>Submitted:</strong> ${rec.timestamp}</p>`;
   } else {
-    body.innerHTML = rec.answers.map((a, idx) => `
+    body.innerHTML = ansList.map((a, idx) => `
       <div style="padding: 0.65rem; border: 1px solid var(--border); border-left: 4px solid ${a.isCorrect ? 'var(--success)' : 'var(--danger)'}; border-radius: 6px; margin-bottom: 0.5rem;">
         <div style="font-weight: 600; font-size: 0.9rem;">${idx + 1}. ${a.q}</div>
         <div style="font-size: 0.84rem; color: ${a.isCorrect ? 'var(--success)' : 'var(--danger)'};">
@@ -667,24 +2171,15 @@ function exportCSV() {
   link.click();
 }
 
-function clearAllResults() {
-  if (confirm('Are you sure you want to delete all stored student results from this browser?')) {
-    localStorage.removeItem(STORAGE_KEY);
-    updateRecordBadge();
-    renderFacultyTable();
-  }
-}
-
 function copyShareLink() {
-  const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
-    alert('Current page URL copied to clipboard! Note: If you are viewing a local file, host index.html on Netlify Drop, Cloudflare Pages, or GitHub Pages to get a public internet link.');
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('Quiz link copied to clipboard!');
   });
 }
 
-// Check if URL has shared result parameter (?res=...)
 window.addEventListener('DOMContentLoaded', () => {
   updateRecordBadge();
+  if (getGasUrl()) syncFromGoogleSheet();
 });
 </script>
 </body>
