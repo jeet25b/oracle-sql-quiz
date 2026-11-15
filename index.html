@@ -126,7 +126,7 @@
       </div>
       <div class="form-group">
         <label for="stu-batch">Batch / Section</label>
-        <input type="text" id="stu-batch" placeholder="e.g., BCA / B.Tech Sem-4">
+        <input type="text" id="stu-batch" placeholder="e.g. B.Tech CSE III A-1">
       </div>
       <div class="form-group">
         <label for="mod-filter">Syllabus Module</label>
@@ -157,7 +157,7 @@
           <option value="0">Untimed Practice Mode</option>
           <option value="15">15 Minutes</option>
           <option value="30">30 Minutes</option>
-          <option value="60">60 Minutes (Full 100-Q Exam)</option>
+          <option value="60" selected>60 Minutes (Full 100-Q Exam)</option>
         </select>
       </div>
     </div>
@@ -2053,7 +2053,8 @@ function toggleImportBox() {
 function importStudentCodes() {
   const raw = document.getElementById('import-code-input').value.trim();
   if (!raw) return;
-  const lines = raw.split(/?
+  const lines = raw.split(/
+?
 /).map(l => l.trim()).filter(Boolean);
   let imported = 0;
   lines.forEach(line => {
