@@ -253,6 +253,17 @@
         <input type="text" id="search-student" placeholder="Search by Student Name, Roll No., or Batch..." oninput="renderFacultyTable()">
       </div>
       <div class="form-group">
+        <select id="filter-attempt" onchange="renderFacultyTable()">
+          <option value="ALL">All Attempts (Show Every Attempt)</option>
+          <option value="LATEST">Latest Attempt per Student</option>
+          <option value="1">Attempt #1 Only</option>
+          <option value="2">Attempt #2 Only</option>
+          <option value="3">Attempt #3 Only</option>
+          <option value="4">Attempt #4 Only</option>
+          <option value="5">Attempt #5+ Only</option>
+        </select>
+      </div>
+      <div class="form-group">
         <select id="filter-grade" onchange="renderFacultyTable()">
           <option value="ALL">All Grades</option>
           <option value="A+">Grade A+ (90%+)</option>
@@ -280,6 +291,7 @@
             <th>Student Name</th>
             <th>Batch</th>
             <th>Module</th>
+            <th>Attempt #</th>
             <th>Score</th>
             <th>Percentage</th>
             <th>Grade</th>
@@ -1915,12 +1927,18 @@ function finishQuiz() {
   const pct = Math.round((score / total) * 100);
   const grade = computeGrade(pct);
 
+  const priorAttempts = getSavedResults().filter(
+    r => String(r.roll).trim().toLowerCase() === String(currentStudent.roll).trim().toLowerCase()
+  ).length;
+  const attemptNum = priorAttempts + 1;
+
   lastResultRecord = {
     id: 'RES-' + Date.now(),
     name: currentStudent.name,
     roll: currentStudent.roll,
     batch: currentStudent.batch,
     module: currentStudent.modLabel,
+    attempt: attemptNum,
     score: score,
     total: total,
     pct: pct,
@@ -1958,6 +1976,7 @@ function copyResultCode() {
     roll: lastResultRecord.roll,
     batch: lastResultRecord.batch,
     module: lastResultRecord.module,
+    attempt: lastResultRecord.attempt || 1,
     score: lastResultRecord.score,
     total: lastResultRecord.total,
     pct: lastResultRecord.pct,
@@ -1985,6 +2004,11 @@ function importStudentCodes() {
       const b64 = line.startsWith('ORACLE_RES::') ? line.replace('ORACLE_RES::', '') : line;
       const obj = JSON.parse(decodeURIComponent(escape(atob(b64))));
       if (obj && obj.name && obj.roll && typeof obj.score === 'number') {
+        const existingSameRoll = getSavedResults().filter(
+          r => String(r.roll).trim().toLowerCase() === String(obj.roll).trim().toLowerCase()
+        );
+        const maxPrevAttempt = existingSameRoll.reduce((mx, r) => Math.max(mx, Number(r.attempt) || 1), 0);
+        obj.attempt = Math.max(Number(obj.attempt) || 1, maxPrevAttempt + 1);
         obj.id = 'IMP-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
         obj.answers = obj.answers || [];
         saveLocalResult(obj);
@@ -1997,15 +2021,58 @@ function importStudentCodes() {
   alert(`Successfully imported ${imported} student result(s).`);
 }
 
+function syncAttemptFilterOptions(allRecords) {
+  const sel = document.getElementById('filter-attempt');
+  if (!sel) return;
+  const currentVal = sel.value;
+  const maxAttempt = allRecords.reduce((mx, r) => Math.max(mx, Number(r.attempt) || 1), 1);
+  let optsHtml = `
+    <option value="ALL">All Attempts (Show Every Attempt)</option>
+    <option value="LATEST">Latest Attempt per Student</option>
+    <option value="FIRST">First Attempt per Student (Attempt #1)</option>
+  `;
+  const limit = Math.max(5, maxAttempt);
+  for (let a = 1; a <= limit; a++) {
+    optsHtml += `<option value="${a}">Attempt #${a} Only</option>`;
+  }
+  sel.innerHTML = optsHtml;
+  if ([...sel.options].some(o => o.value === currentVal)) {
+    sel.value = currentVal;
+  }
+}
+
 function renderFacultyTable() {
   const all = getSavedResults();
+  syncAttemptFilterOptions(all);
+
   const query = document.getElementById('search-student').value.toLowerCase();
+  const attemptFilter = document.getElementById('filter-attempt').value;
   const gradeFilter = document.getElementById('filter-grade').value;
+
+  // Map latest attempt number per roll number (case-insensitive)
+  const latestAttemptByRoll = {};
+  all.forEach(r => {
+    const key = String(r.roll || '').trim().toLowerCase();
+    const att = Number(r.attempt) || 1;
+    if (!latestAttemptByRoll[key] || att > latestAttemptByRoll[key]) {
+      latestAttemptByRoll[key] = att;
+    }
+  });
 
   const filtered = all.filter(r => {
     const matchesSearch = String(r.name).toLowerCase().includes(query) || String(r.roll).toLowerCase().includes(query) || String(r.batch || '').toLowerCase().includes(query);
     const matchesGrade = gradeFilter === 'ALL' || r.grade === gradeFilter;
-    return matchesSearch && matchesGrade;
+    const att = Number(r.attempt) || 1;
+    const rollKey = String(r.roll || '').trim().toLowerCase();
+    let matchesAttempt = true;
+    if (attemptFilter === 'LATEST') {
+      matchesAttempt = att === latestAttemptByRoll[rollKey];
+    } else if (attemptFilter === 'FIRST') {
+      matchesAttempt = att === 1;
+    } else if (attemptFilter !== 'ALL') {
+      matchesAttempt = att === Number(attemptFilter);
+    }
+    return matchesSearch && matchesGrade && matchesAttempt;
   });
 
   document.getElementById('dash-total').textContent = filtered.length;
@@ -2024,7 +2091,7 @@ function renderFacultyTable() {
 
   const tbody = document.getElementById('faculty-tbody');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet. Paste student result codes above to add them.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--muted); padding: 1.5rem;">No student records found yet. Paste student result codes above to add them.</td></tr>`;
     return;
   }
 
@@ -2038,6 +2105,7 @@ function renderFacultyTable() {
         <td>${r.name}</td>
         <td>${r.batch || '-'}</td>
         <td>${r.module}</td>
+        <td><span class="badge" style="background:#f1f5f9;color:#1b365d;">Attempt ${r.attempt || 1}</span></td>
         <td><strong>${r.score}/${r.total}</strong></td>
         <td>${r.pct}%</td>
         <td><span class="grade-pill ${pillClass}">${gradeStr}</span></td>
@@ -2049,18 +2117,40 @@ function renderFacultyTable() {
 }
 
 function inspectStudent(id) {
-  const rec = getSavedResults().find(r => String(r.id) === String(id));
+  const all = getSavedResults();
+  const rec = all.find(r => String(r.id) === String(id));
   if (!rec) return;
-  document.getElementById('modal-title').textContent = `${rec.name} (${rec.roll}) — ${rec.score}/${rec.total} (${rec.pct}% | Grade ${rec.grade})`;
+
+  const sameStudentAttempts = all
+    .filter(r => String(r.roll).trim().toLowerCase() === String(rec.roll).trim().toLowerCase())
+    .sort((a, b) => (Number(a.attempt) || 1) - (Number(b.attempt) || 1));
+
+  document.getElementById('modal-title').textContent = `${rec.name} (${rec.roll}) | Attempt #${rec.attempt || 1} — ${rec.score}/${rec.total} (${rec.pct}% | Grade ${rec.grade})`;
   const body = document.getElementById('modal-body');
+
+  let attemptSwitcherHtml = '';
+  if (sameStudentAttempts.length > 1) {
+    const options = sameStudentAttempts.map(a =>
+      `<option value="${a.id}" ${String(a.id) === String(rec.id) ? 'selected' : ''}>Attempt #${a.attempt || 1} — ${a.score}/${a.total} (${a.pct}% | Grade ${a.grade}) [${a.timestamp}]</option>`
+    ).join('');
+    attemptSwitcherHtml = `
+      <div style="background:#f0fdfa; border:1px solid #99f6e4; padding:0.75rem; border-radius:8px; margin-bottom:1rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <label style="margin:0; font-size:0.88rem;">Select Student Attempt (${sameStudentAttempts.length} total):</label>
+        <select onchange="inspectStudent(this.value)" style="flex:1; min-width:220px; padding:0.45rem 0.65rem; font-size:0.88rem;">
+          ${options}
+        </select>
+      </div>
+    `;
+  }
+
   let ansList = rec.answers;
   if (typeof ansList === 'string') {
     try { ansList = JSON.parse(ansList); } catch (e) { ansList = []; }
   }
   if (!ansList || ansList.length === 0) {
-    body.innerHTML = `<p style="color: var(--muted);"><strong>Batch:</strong> ${rec.batch} | <strong>Module:</strong> ${rec.module} | <strong>Time Taken:</strong> ${rec.timeTaken} | <strong>Submitted:</strong> ${rec.timestamp}</p>`;
+    body.innerHTML = attemptSwitcherHtml + `<p style="color: var(--muted);"><strong>Batch:</strong> ${rec.batch} | <strong>Module:</strong> ${rec.module} | <strong>Attempt #:</strong> ${rec.attempt || 1} | <strong>Time Taken:</strong> ${rec.timeTaken} | <strong>Submitted:</strong> ${rec.timestamp}</p>`;
   } else {
-    body.innerHTML = ansList.map((a, idx) => `
+    body.innerHTML = attemptSwitcherHtml + ansList.map((a, idx) => `
       <div style="padding: 0.65rem; border: 1px solid var(--border); border-left: 4px solid ${a.isCorrect ? 'var(--success)' : 'var(--danger)'}; border-radius: 6px; margin-bottom: 0.5rem;">
         <div style="font-weight: 600; font-size: 0.9rem;">${idx + 1}. ${a.q}</div>
         <div style="font-size: 0.84rem; color: ${a.isCorrect ? 'var(--success)' : 'var(--danger)'};">
@@ -2082,10 +2172,10 @@ function exportCSV() {
     alert('No student records available to export.');
     return;
   }
-  const headers = ['Roll No', 'Student Name', 'Batch', 'Module', 'Score', 'Total', 'Percentage', 'Grade', 'Time Taken', 'Submitted At'];
+  const headers = ['Roll No', 'Student Name', 'Batch', 'Module', 'Attempt No', 'Score', 'Total', 'Percentage', 'Grade', 'Time Taken', 'Submitted At'];
   const rows = all.map(r => [
     `"${r.roll}"`, `"${r.name}"`, `"${r.batch || ''}"`, `"${r.module}"`,
-    r.score, r.total, `${r.pct}%`, `"${r.grade}"`, `"${r.timeTaken || ''}"`, `"${r.timestamp}"`
+    r.attempt || 1, r.score, r.total, `${r.pct}%`, `"${r.grade}"`, `"${r.timeTaken || ''}"`, `"${r.timestamp}"`
   ].join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
