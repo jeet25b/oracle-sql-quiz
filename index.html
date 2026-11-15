@@ -165,6 +165,44 @@
   .grade-C { background: var(--warning-bg); color: var(--warning); }
   .grade-F { background: var(--danger-bg); color: var(--danger); }
 
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #c4b5fd;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  [data-theme="dark"] .ai-badge {
+    background: rgba(139, 92, 246, 0.22);
+    color: #ddd6fe;
+    border-color: rgba(167, 139, 250, 0.45);
+  }
+  .qb-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 0.9rem;
+  }
+  .qb-q {
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--primary);
+    margin-bottom: 0.55rem;
+  }
+  .qb-a {
+    font-size: 0.94rem;
+    color: var(--text);
+    white-space: pre-line;
+    margin-top: 0.45rem;
+  }
   .hidden { display: none !important; }
   .alert { padding: 0.85rem 1rem; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.9rem; margin-bottom: 1rem; }
   .alert-success { background: var(--success-bg); border-color: #86efac; color: #14532d; }
@@ -180,7 +218,8 @@
     <p id="header-subtitle">100-Question Bank (Modules 1–9) — Student Assessment</p>
   </div>
   <div class="nav-actions">
-    <button class="btn btn-secondary teacher-only hidden" onclick="showView('student-setup')">Student View</button>
+    <button class="btn btn-secondary" onclick="showView('student-setup')">MCQ Quiz</button>
+    <button class="btn btn-secondary" onclick="showView('question-bank')">Question Bank (75)</button>
     <button class="btn btn-secondary teacher-only hidden" onclick="showView('faculty-dashboard')">Faculty Results (<span id="record-count">0</span>)</button>
     <button class="btn btn-secondary" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light / Dark Mode">&#9790; Dark</button>
     <button class="btn btn-primary" id="share-btn" onclick="copyShareLink()">Share Student Link</button>
@@ -242,6 +281,7 @@
 
     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
       <button class="btn btn-primary" onclick="startQuiz()">Start Assessment</button>
+      <button class="btn btn-outline" onclick="showView('question-bank')">Open Conceptual Question Bank (75 Q&amp;A)</button>
       <button class="btn btn-outline teacher-only hidden" onclick="showView('faculty-dashboard')">Open Faculty Results</button>
     </div>
   </section>
@@ -381,6 +421,44 @@
         <tbody id="faculty-tbody"></tbody>
       </table>
     </div>
+  </section>
+
+  <!-- VIEW 5: CONCEPTUAL QUESTION BANK -->
+  <section id="view-question-bank" class="card hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+      <div>
+        <h2 style="color: var(--primary);">Oracle SQL &amp; PL/SQL Conceptual Question Bank</h2>
+        <p style="color: var(--muted); font-size: 0.92rem;">Complete theory, comparison, and interview Q&amp;A across all syllabus modules. Every answer is clearly labeled as an <strong>AI Generated Answer</strong>.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-outline" id="toggle-all-ans-btn" onclick="toggleAllQbAnswers()">Hide All Answers</button>
+        <button class="btn btn-primary" onclick="showView('student-setup')">Take MCQ Quiz &rarr;</button>
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top: 0.5rem;">
+      <div class="form-group">
+        <input type="text" id="qb-search" placeholder="Search questions or keywords (e.g., TRUNCATE, Cursor, USING, NULL)..." oninput="renderQuestionBank()">
+      </div>
+      <div class="form-group">
+        <select id="qb-mod-filter" onchange="renderQuestionBank()">
+          <option value="ALL">All Modules &amp; Interview Questions (75 Q&amp;A)</option>
+          <option value="M1">Module 1: DBMS, Oracle &amp; SQL Basics</option>
+          <option value="M2">Module 2: Oracle Data Types</option>
+          <option value="M3">Module 3: Integrity &amp; Key Constraints</option>
+          <option value="M4">Module 4: Data Definition Language (DDL)</option>
+          <option value="M5">Module 5: Data Manipulation Language (DML)</option>
+          <option value="M6">Module 6: DQL, Operators &amp; Aggregates</option>
+          <option value="M7">Module 7: Subqueries</option>
+          <option value="M8">Module 8: Joins</option>
+          <option value="M9">Module 9: Triggers, Cursors &amp; Assertions</option>
+          <option value="INT">Important Exam &amp; Interview Questions</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="qb-count-label" style="font-size: 0.88rem; color: var(--muted); font-weight: 600; margin-bottom: 0.85rem;"></div>
+    <div id="qb-list-container"></div>
   </section>
 </main>
 
@@ -1861,12 +1939,15 @@ function showView(viewName) {
   if (viewName === 'faculty-dashboard' && !isTeacherMode) {
     viewName = 'student-setup';
   }
-  ['student-setup', 'quiz', 'result', 'faculty-dashboard'].forEach(v => {
-    document.getElementById('view-' + v).classList.add('hidden');
+  ['student-setup', 'quiz', 'result', 'faculty-dashboard', 'question-bank'].forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.classList.add('hidden');
   });
   document.getElementById('view-' + viewName).classList.remove('hidden');
   if (viewName === 'faculty-dashboard') {
     renderFacultyTable();
+  } else if (viewName === 'question-bank') {
+    renderQuestionBank();
   }
 }
 
@@ -2324,6 +2405,507 @@ window.addEventListener('DOMContentLoaded', () => {
     showView('student-setup');
   }
 });
+
+const QUESTION_BANK = [
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q1. Define Database, DBMS, Relational Database, and RDBMS. How do Relational and Non-relational (NoSQL) databases differ in data organization?",
+    "a": "\u2022 Database: An organized collection of interrelated data stored electronically that can be easily accessed, managed, and modified.\n\u2022 DBMS: Software that enables users to create, manage, manipulate, and communicate with databases.\n\u2022 Relational Database & RDBMS: A relational database organizes data into rows and columns forming tables, and an RDBMS (such as Oracle, MySQL, PostgreSQL) is the software used to manage it. Non-relational (NoSQL) databases (such as MongoDB) do not store data in structured relational tables."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q2. Distinguish between Keywords, Identifiers, Constraints, Data, and Literals in Oracle SQL.",
+    "a": "\u2022 Keywords: Reserved words that Oracle understands as commands (e.g., CREATE, TABLE, NUMBER, PRIMARY KEY).\n\u2022 Identifiers: User-defined names given to database objects such as tables and columns.\n\u2022 Constraints: Rules applied to columns/tables to enforce data integrity and business logic (e.g., PRIMARY KEY, NOT NULL, CHECK).\n\u2022 Literals vs. Data: A literal is a fixed value typed directly into a SQL statement (e.g., 'Amit' or 6000), which Oracle converts and permanently stores as data upon execution."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q3. State the rules for naming identifiers (table and column names) in Oracle, including character limits in Oracle 12.2+ versus earlier versions.",
+    "a": "\u2022 Must start with an alphabet (A\u2013Z or a\u2013z).\n\u2022 Can contain letters, numbers (0\u20139), underscore (_), hash (#), and dollar sign ($).\n\u2022 Cannot contain spaces or be an SQL reserved keyword, and must be unique within its schema.\n\u2022 Unquoted identifiers are case-insensitive and stored in uppercase; enclosing them in double quotes makes them case-sensitive.\n\u2022 Length Limits: Maximum 128 characters in Oracle 12.2 and later; maximum 30 characters in versions prior to 12.2."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q4. Explain the behavior of NULL in Oracle SQL. Why does comparing a column with '= NULL' fail, and what operators must be used instead?",
+    "a": "NULL represents no value, a missing value, or an unknown value\u2014it is not equivalent to 0 or an empty string. Because NULL is never equal to anything (not even another NULL), standard comparison operators (= or !=) fail to match NULL rows. Special operators IS NULL and IS NOT NULL must be used instead."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q5. Contrast the SQL Writing Order with the Oracle Logical Query Execution Order.",
+    "a": "\u2022 SQL Writing Order: SELECT -> FROM -> WHERE -> GROUP BY -> HAVING -> ORDER BY\n\u2022 Oracle Logical Execution Order: FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY"
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q6. What is the difference between a Field/Attribute and a Record/Tuple in an RDBMS table?",
+    "a": "A Field / Attribute is a vertical column representing a single property or entity characteristic (such as EMP_ID, Name, or Salary). A Record / Tuple is an individual horizontal row representing one complete data entry in the table."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q7. Why does a column named NAME turn blue in Oracle Live SQL, and is it safe to use?",
+    "a": "NAME is highlighted in blue because it is a commonly used built-in identifier in Oracle Live SQL syntax highlighting rules. It is safe to use as a column name, unlike strictly reserved SQL keywords such as SELECT or CREATE."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q8. Compare the feedback output of Oracle Live SQL Server versus OneCompiler when executing CREATE TABLE or INSERT statements.",
+    "a": "Oracle Live SQL Server displays confirmation messages (such as 'Table EMPLOYEES created.' or '1 row inserted.'), whereas OneCompiler produces no output ('Program did not output anything!') upon successful execution."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q9. What is the difference between unquoted identifiers and double-quoted identifiers (\" \") in Oracle SQL?",
+    "a": "Unquoted identifiers are case-insensitive by default and are automatically converted and stored in uppercase by Oracle (EMP, emp, and Emp are treated identically as EMP). Enclosing an identifier in double quotes (\" \") makes it strictly case-sensitive."
+  },
+  {
+    "mod": "M1",
+    "modTitle": "Module 1: Introduction to DBMS, Oracle & SQL Basics",
+    "q": "Q10. How can date literals be written in Oracle SQL statements?",
+    "a": "Date values can be written as strings inside single quotes in default format ('10-AUG-2025'), using the ANSI date literal syntax (DATE '2025-08-10'), or explicitly converted using TO_DATE('2025-08-10', 'YYYY-MM-DD')."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q1. Compare CHAR(size) and VARCHAR2(size) in terms of storage allocation, padding behavior, maximum byte limit, and performance.",
+    "a": "\u2022 CHAR(size): Fixed-length character string up to 2,000 bytes (default 1 byte). If input is shorter than the defined size, Oracle right-pads the remaining space with blanks. Faster than VARCHAR2 for fixed-width codes.\n\u2022 VARCHAR2(size): Variable-length character string up to 4,000 bytes (size is mandatory). Allocates only the exact space needed without blank padding."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q2. Explain NUMBER(p, s) with positive, zero, and negative scale (s) values. What happens if NUMBER(*, 2) is used versus NUMBER(, 2)?",
+    "a": "\u2022 Precision (p, 1 to 38) specifies the total number of significant digits; Scale (s, -84 to 127) specifies digits relative to the decimal point.\n\u2022 Positive s sets decimal places to the right; s = 0 stores whole numbers; negative s rounds digits to the left of the decimal point.\n\u2022 NUMBER(*, 2) is valid (allows full precision with 2 decimal places), whereas omitting the asterisk as NUMBER(, 2) causes a syntax error."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q3. How does Oracle internally store the INTEGER (or INT) ANSI data type, and how does it handle fractional inputs like 12.5?",
+    "a": "Oracle internally converts INTEGER to NUMBER(38, 0), allowing up to 38 digits (slower than native NUMBER). Any fractional input is automatically rounded off (for example, 12.2 becomes 12, and 12.5 becomes 13)."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q4. What datetime fields are stored in Oracle's DATE data type, what is its fixed storage size in bytes, and what is its maximum precision?",
+    "a": "Oracle's DATE data type stores Century, Year, Month, Day, Hour, Minute, and Second in a fixed size of 7 bytes. It provides precision up to the second and does not store fractional seconds or time zones."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q5. Explain the difference between BYTE and CHAR length semantics in CHAR(size [BYTE|CHAR]) and VARCHAR2(size [BYTE|CHAR]).",
+    "a": "By default, Oracle allocates 1 byte per character. Specifying BYTE limits the column to that exact number of bytes, whereas CHAR reserves space for that number of characters regardless of multi-byte character encoding."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q6. What happens in Oracle if you insert a value larger than the defined size of a CHAR or VARCHAR2 column, or exceed the precision of a NUMBER column?",
+    "a": "Oracle Database rejects the operation and immediately returns an error rather than silently truncating the value."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q7. If you define a column simply as NUMBER without specifying precision p or scale s, how does Oracle store values? What if only precision NUMBER(p) is specified?",
+    "a": "When neither precision nor scale is specified (NUMBER), Oracle stores numeric values exactly as given. When precision is given without scale (NUMBER(5)), the scale defaults to zero (0), storing whole numbers."
+  },
+  {
+    "mod": "M2",
+    "modTitle": "Module 2: Oracle Data Types",
+    "q": "Q8. How does INTEGER compare with native NUMBER in Oracle performance, and how does INTEGER round 12.2 versus 12.5?",
+    "a": "Because INTEGER is an ANSI datatype that Oracle internally converts to NUMBER(38, 0), it is always slower than native NUMBER. Any fractional part is automatically rounded off (12.2 becomes 12, while 12.5 becomes 13)."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q1. Differentiate between Integrity Constraints and Key Constraints.",
+    "a": "\u2022 Integrity Constraints: General rules applied to table columns to maintain valid, accurate data across all validation types (NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK, DEFAULT).\n\u2022 Key Constraints: A narrower subset of integrity constraints focused specifically on uniquely identifying rows and establishing relationships between tables (PRIMARY KEY, UNIQUE KEY, FOREIGN KEY, Composite Key)."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q2. Compare Column-level constraints and Table-level constraints. Which two constraints can only be applied at the column level?",
+    "a": "\u2022 Column-level constraints are defined inline immediately after a column's data type and apply to that single column.\n\u2022 Table-level constraints are declared at the end of the table definition after all columns and can span multiple columns (composite keys).\n\u2022 Only NOT NULL and DEFAULT can be applied exclusively at the column level."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q3. Explain the six types of constraints and how Oracle treats NULL values inside a UNIQUE column.",
+    "a": "\u2022 NOT NULL: Prevents missing/NULL values.\n\u2022 UNIQUE: Prevents duplicate values across rows.\n\u2022 PRIMARY KEY: Combines NOT NULL and UNIQUE to uniquely identify every row (maximum one primary key per table).\n\u2022 FOREIGN KEY: Links a child table column to a parent table's PRIMARY KEY or UNIQUE column to enforce referential integrity.\n\u2022 CHECK: Enforces a custom boolean condition on column values.\n\u2022 DEFAULT: Assigns a default value when no value is supplied during insertion.\n\u2022 NULL in UNIQUE: Oracle allows multiple NULL values in a UNIQUE column because NULL is never considered equal to another NULL."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q4. List the rules and prerequisites for creating a FOREIGN KEY relationship between a parent and child table, including insertion and deletion order.",
+    "a": "\u2022 The parent table must exist before creating the foreign key in the child table.\n\u2022 The referenced parent column(s) must have a PRIMARY KEY or UNIQUE constraint and a compatible data type.\n\u2022 Insertion Order: Insert records into the parent table first, then into the child table.\n\u2022 Deletion Order: Delete records from the child table first, then from the parent table (unless ON DELETE CASCADE or SET NULL is defined)."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q5. Explain the purpose of ON DELETE CASCADE and ON DELETE SET NULL.",
+    "a": "\u2022 ON DELETE CASCADE: Automatically deletes all matching dependent rows in the child table when a referenced row in the parent table is deleted.\n\u2022 ON DELETE SET NULL: Automatically sets the foreign key column values in dependent child rows to NULL when the referenced parent row is deleted."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q6. In Oracle's USER_CONSTRAINTS data dictionary view, what do constraint types P, U, R, and C represent?",
+    "a": "\u2022 P: Primary Key\n\u2022 U: Unique Key\n\u2022 R: Foreign Key (Referential Integrity)\n\u2022 C: Check constraint or NOT NULL constraint"
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q7. Explain the behavior of a Composite PRIMARY KEY and a Composite UNIQUE key.",
+    "a": "A Composite Primary Key combines two or more columns to uniquely identify each row (none of the participating columns can be NULL). A Composite Unique Key enforces uniqueness across the combined values of two or more columns while still permitting NULL values in Oracle."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q8. What happens if you try to create a FOREIGN KEY referencing a non-unique column in the parent table, or referencing a parent table that does not yet exist?",
+    "a": "Oracle rejects the CREATE TABLE or ALTER TABLE statement because the parent table must already exist and the referenced parent column(s) must be constrained as either a PRIMARY KEY or a UNIQUE key."
+  },
+  {
+    "mod": "M3",
+    "modTitle": "Module 3: Integrity & Key Constraints",
+    "q": "Q9. What is the difference between a named constraint and a system-generated constraint name in Oracle?",
+    "a": "When you omit the CONSTRAINT constraint_name clause, Oracle automatically assigns a system-generated name prefixed with SYS_C (such as SYS_C003424681). Naming constraints explicitly (e.g., pk_emp_empid) makes error messages and ALTER TABLE ... DROP/DISABLE CONSTRAINT maintenance clear and predictable."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q1. List the five subdivisions of SQL and explain why DDL statements cannot be rolled back.",
+    "a": "\u2022 Subdivisions: DDL (Data Definition Language), DML (Data Manipulation Language), DQL (Data Query Language), DCL (Data Control Language), and TCL (Transaction Control Language).\n\u2022 Auto-Commit: DDL commands (CREATE, ALTER, RENAME, TRUNCATE, DROP) issue an implicit COMMIT before and after execution, permanently saving changes so they cannot be undone via ROLLBACK."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q2. Compare DELETE, TRUNCATE, and DROP across rollback capability, storage space release, speed, and impact on table structure.",
+    "a": "\u2022 DELETE (DML): Removes rows one by one, fires DELETE triggers, is slower for full-table removal, retains allocated storage space, preserves table structure, and can be rolled back.\n\u2022 TRUNCATE (DDL): Quickly removes all rows at once, releases storage space back to the tablespace, preserves table structure/constraints/indexes, and cannot be rolled back (unless Flashback is configured).\n\u2022 DROP (DDL): Permanently deletes all rows along with the entire table definition, constraints, and indexes from the database."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q3. State the rules and restrictions of the RENAME command. Which database objects cannot be directly renamed using RENAME?",
+    "a": "\u2022 RENAME is an auto-committing DDL command requiring object ownership or appropriate privileges, and does not use the TABLE keyword.\n\u2022 It can rename tables, views, sequences, synonyms, and private database links.\n\u2022 Cannot directly rename: Procedures, functions, packages, and triggers (they must be dropped and recreated)."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q4. Under what conditions will Oracle reject an ALTER TABLE ... MODIFY or ADD CONSTRAINT command on an existing table?",
+    "a": "\u2022 Shrinking a column size below the length of existing data.\n\u2022 Changing a non-empty column to an incompatible data type (e.g., NUMBER to DATE).\n\u2022 Adding a constraint (such as NOT NULL or CHECK) when existing rows violate that rule (unless NOVALIDATE is used where supported).\n\u2022 Dropping or modifying a column referenced by another table's foreign key without dropping or cascading the dependent constraint first."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q5. Why is TCL (Transaction Control Language) noted separately in SQL subdivisions, and what commands belong to TCL and DCL?",
+    "a": "TCL (COMMIT, ROLLBACK, SAVEPOINT) manages database transactions and is noted as a 5th component outside core ANSI DDL/DML/DQL classifications, whereas DCL (GRANT, REVOKE) controls user access and privileges."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q6. What is the difference between ALTER TABLE ... DROP UNIQUE (column_name) and ALTER TABLE ... DROP CONSTRAINT constraint_name?",
+    "a": "DROP UNIQUE (mail_id) drops a unique constraint directly by its column name without needing to look up its system-generated constraint name, whereas DROP CONSTRAINT constraint_name requires the exact constraint identifier."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q7. What happens when you attempt to DROP or MODIFY the data type of a column that is part of a multi-column constraint or referenced by another table's FOREIGN KEY?",
+    "a": "Oracle blocks the operation unless you first drop/disable the dependent constraint or include CASCADE CONSTRAINTS (for DROP COLUMN) / CASCADE (for DROP PRIMARY KEY)."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q8. Why can ALTER TABLE operations like ADD COLUMN, MODIFY, or enabling a FOREIGN KEY impact concurrency in a multi-user environment?",
+    "a": "These DDL operations can place a table lock on the table until the modification or constraint validation completes."
+  },
+  {
+    "mod": "M4",
+    "modTitle": "Module 4: Data Definition Language (DDL)",
+    "q": "Q9. Why cannot an existing constraint's CHECK condition be altered directly using ALTER TABLE ... MODIFY CONSTRAINT?",
+    "a": "Oracle does not allow modifying a constraint's rule definition directly; you must first DROP the existing constraint and then ADD the updated constraint."
+  },
+  {
+    "mod": "M5",
+    "modTitle": "Module 5: Data Manipulation Language (DML)",
+    "q": "Q1. Explain how Oracle stores rows by default and why row order is never guaranteed without an ORDER BY clause.",
+    "a": "By default, Oracle stores table rows in an unordered heap structure. When rows are deleted, subsequent INSERT operations may reuse those freed gaps rather than appending at the end, meaning retrieval order is never guaranteed unless ORDER BY is explicitly specified."
+  },
+  {
+    "mod": "M5",
+    "modTitle": "Module 5: Data Manipulation Language (DML)",
+    "q": "Q2. Differentiate between Substitution Variables (&) and Bind Variables (:) for runtime user input in Oracle.",
+    "a": "\u2022 Substitution Variables (&var): Used in SQL*Plus to prompt the user and perform text replacement before the SQL statement is parsed and executed.\n\u2022 Bind Variables (:var): Used in Oracle Live SQL and Oracle SQL Developer to prompt for and bind typed values at runtime."
+  },
+  {
+    "mod": "M5",
+    "modTitle": "Module 5: Data Manipulation Language (DML)",
+    "q": "Q3. Compare the two ways of writing an INSERT INTO statement: with explicit column names versus without column names.",
+    "a": "\u2022 With column names: You can insert values for a subset of columns (omitted nullable columns take NULL or their DEFAULT value) and arrange columns in any order.\n\u2022 Without column names: You must supply values for every column in the table in the exact order defined in the table's structure."
+  },
+  {
+    "mod": "M5",
+    "modTitle": "Module 5: Data Manipulation Language (DML)",
+    "q": "Q4. How does INSERT ALL work in Oracle 12c+, and can it insert rows into multiple different tables in a single statement?",
+    "a": "Yes. INSERT ALL uses multiple INTO table_name (cols) VALUES (vals) clauses followed by a subquery (such as SELECT * FROM dual;), allowing you to insert multiple rows into one table or across multiple different tables (e.g., employee and department) in a single statement."
+  },
+  {
+    "mod": "M5",
+    "modTitle": "Module 5: Data Manipulation Language (DML)",
+    "q": "Q5. Why is WHERE INITCAP(CITY) = 'Bhopal' safer than WHERE CITY = 'Bhopal' when updating or deleting records?",
+    "a": "Because string data inside Oracle tables is case-sensitive ('Bhopal', 'bhopal', and 'BHOPAL' are treated as distinct strings), normalizing case with INITCAP() or UPPER() ensures matching rows are not missed due to inconsistent casing."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q1. What is the Oracle DUAL table? Describe its structure and primary purpose.",
+    "a": "DUAL is a special built-in single-row, single-column table owned by SYS. It contains one column named DUMMY of type VARCHAR2(1) with a single row value of 'X'. It is used for evaluating arithmetic expressions, calling built-in functions (like SYSDATE or USER), or selecting constants without querying a user table."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q2. Explain pattern matching with LIKE using % and _ wildcards.",
+    "a": "\u2022 % (Percent): Matches any sequence of zero, one, or multiple characters.\n\u2022 _ (Underscore): Matches exactly one single character at that position."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q3. How does SELECT DISTINCT behave when applied to multiple columns?",
+    "a": "When multiple columns are listed after DISTINCT, Oracle evaluates uniqueness across the combined tuple of values across all listed columns rather than each column individually."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q4. List the five primary Oracle aggregate functions and explain how they handle NULL values.",
+    "a": "\u2022 Functions: COUNT(), SUM(), AVG(), MIN(), and MAX().\n\u2022 NULL Handling: All five functions ignore NULL values in a specified column. The only exception is COUNT(*), which counts every row in the group/table regardless of NULL values."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q5. Compare Single-Row Functions and Aggregate (Group / Multi-Row) Functions in Oracle SQL with examples.",
+    "a": "\u2022 Single-Row Functions operate on each row individually and return one result per row (e.g., TO_CHAR, TO_NUMBER, TO_DATE, UPPER, NVL, SUBSTR, INSTR).\n\u2022 Aggregate (Group) Functions operate on a set of rows and return a single summary value (e.g., COUNT, SUM, AVG, MIN, MAX)."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q6. Explain the difference between Arithmetic, Comparison, Logical, Range/Set, Pattern Matching, and Null operators in Oracle SQL.",
+    "a": "\u2022 Arithmetic: +, -, *, / for numeric calculations.\n\u2022 Comparison: =, != / <>, >, <, >=, <= returning TRUE, FALSE, or NULL.\n\u2022 Logical: AND, OR, NOT for combining conditions.\n\u2022 Range/Set: BETWEEN ... AND ..., IN (...), NOT IN (...).\n\u2022 Pattern Matching: LIKE and NOT LIKE with % and _.\n\u2022 Null: IS NULL and IS NOT NULL."
+  },
+  {
+    "mod": "M6",
+    "modTitle": "Module 6: Data Query Language (DQL), Operators & Aggregate Functions",
+    "q": "Q7. How can SUBSTR and INSTR be combined in a SELECT DISTINCT query to extract unique email domains from a mail_id column?",
+    "a": "INSTR(mail_id, '@') + 1 locates the character position immediately after '@', and SUBSTR(mail_id, INSTR(mail_id, '@') + 1) extracts the domain substring, which SELECT DISTINCT then deduplicates."
+  },
+  {
+    "mod": "M7",
+    "modTitle": "Module 7: Subqueries",
+    "q": "Q1. Define a subquery and state its key rules regarding ORDER BY, column visibility, and maximum nesting depth.",
+    "a": "\u2022 Definition: A subquery (inner or nested query) is a query embedded inside another SQL statement.\n\u2022 Rules: ORDER BY cannot be used inside a standard subquery (unless inside an inline view), and columns defined exclusively in the inner query cannot be referenced in the outer query's SELECT list.\n\u2022 Nesting Limit: Oracle allows up to 255 levels of nested subqueries in a WHERE clause."
+  },
+  {
+    "mod": "M7",
+    "modTitle": "Module 7: Subqueries",
+    "q": "Q2. Why does using '=' with a multi-row subquery produce an error, and which operators resolve it?",
+    "a": "Single-row comparison operators (=, >, <) expect the inner query to return at most one scalar value; if multiple rows are returned, Oracle raises an error. Multi-row operators such as IN, ANY, or ALL must be used instead."
+  },
+  {
+    "mod": "M7",
+    "modTitle": "Module 7: Subqueries",
+    "q": "Q3. Compare solving a multi-table lookup using two separate manual queries versus using a single subquery.",
+    "a": "Manual lookup requires running a first query to hardcode a literal ID (e.g., finding 'D004' for 'IT') and pasting it into a second query, which breaks if data changes. A subquery dynamically evaluates the inner query first and passes the result directly into the outer WHERE clause."
+  },
+  {
+    "mod": "M7",
+    "modTitle": "Module 7: Subqueries",
+    "q": "Q4. Why is UPPER(TRIM(name)) = 'AMIT SHARMA' recommended inside subquery WHERE conditions?",
+    "a": "TRIM() removes accidental leading or trailing spaces and UPPER() normalizes letter casing, preventing a scalar subquery from returning zero rows (NULL) due to formatting discrepancies."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q1. Distinguish between Inner Join, Left Outer Join, Right Outer Join, and Full Outer Join.",
+    "a": "\u2022 Inner Join: Returns only rows where the join condition matches in both tables.\n\u2022 Left Outer Join: Returns all rows from the left table and matching rows from the right table (filling unmatched right columns with NULL).\n\u2022 Right Outer Join: Returns all rows from the right table and matching rows from the left table (filling unmatched left columns with NULL).\n\u2022 Full Outer Join: Returns all matching and non-matching rows from both tables."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q2. What is a Cross Join (Cartesian Join), and how many rows does it produce?",
+    "a": "A Cross Join pairs every row from the first table with every row from the second table without any join condition. If Table A has m rows and Table B has n rows, the result contains m x n rows (e.g., 6 x 6 = 36 rows)."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q3. Explain the rule for using the USING clause in ANSI joins and why qualifying the column name causes ORA-01748.",
+    "a": "The USING(column_name) clause joins two tables on a shared column name and displays that common column only once in the output. Prefixing the column inside USING with a table name or alias (e.g., USING(d.dept_id)) raises ORA-01748 because Oracle only permits simple, unqualified column names inside USING."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q4. What is a Self Join and when is it used?",
+    "a": "A Self Join joins a table to itself by referencing the same table twice in the FROM clause with two distinct aliases. It is used to query hierarchical or recursive relationships within the same table, such as mapping employees to their managers."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q5. Explain how a Self Join works internally during query execution and why table aliases are mandatory.",
+    "a": "In a Self Join, the same table is listed twice in the FROM clause with two distinct temporary aliases (e.g., employee e and employee m) scoped only to query execution. Distinct aliases are mandatory so Oracle can distinguish the child/employee instance from the parent/manager instance in the ON condition (e.mngr_id = m.emp_id)."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q6. What happens in a Self Join if you mistakenly write ON e.emp_id = m.emp_id instead of ON e.mngr_id = m.emp_id?",
+    "a": "Every employee row joins to itself, displaying each employee as their own manager rather than matching each employee's mngr_id to their manager's emp_id."
+  },
+  {
+    "mod": "M8",
+    "modTitle": "Module 8: Joins",
+    "q": "Q7. Compare joining tables using the ON clause versus the USING clause.",
+    "a": "The ON clause supports arbitrary join conditions (even when column names differ) and keeps both tables' join columns in SELECT * output. The USING(col) clause requires identical column names, forbids table alias prefixes inside USING(), and displays the shared column only once."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q1. Define a Database Trigger and classify Oracle triggers by Timing, Event, and Level.",
+    "a": "A trigger is a stored PL/SQL program associated with a table, view, schema, or database that fires automatically when a specified event occurs.\n\u2022 By Timing: BEFORE, AFTER, and INSTEAD OF (used on views).\n\u2022 By Event: DML triggers (INSERT, UPDATE, DELETE), DDL triggers (CREATE, ALTER, DROP), and Database/System triggers (LOGON, LOGOFF, STARTUP, SHUTDOWN).\n\u2022 By Level: Row-level triggers (FOR EACH ROW, execute once per affected row) and Statement-level triggers (execute once per SQL statement)."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q2. Explain the :OLD and :NEW qualifiers across INSERT, UPDATE, and DELETE row-level triggers.",
+    "a": "\u2022 :OLD holds the column value prior to the DML change; :NEW holds the column value after the change.\n\u2022 INSERT: Only :NEW is defined (:OLD is NULL).\n\u2022 UPDATE: Both :OLD and :NEW are defined.\n\u2022 DELETE: Only :OLD is defined (:NEW is NULL)."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q3. What is a Cursor in Oracle PL/SQL? Compare Implicit Cursors and Explicit Cursors.",
+    "a": "A cursor is a pointer (handle) to the context area holding the result set of a SQL query.\n\u2022 Implicit Cursor: Automatically created, opened, processed, and closed by Oracle for single-row SELECT INTO and DML statements (referenced via the name SQL).\n\u2022 Explicit Cursor: Manually declared and controlled by the programmer to fetch and process multi-row query results one row at a time."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q4. List the four lifecycle steps of an Explicit Cursor and explain the four cursor attributes.",
+    "a": "\u2022 Lifecycle Steps: 1. DECLARE (define query) -> 2. OPEN (execute query & allocate memory) -> 3. FETCH (retrieve row into variables) -> 4. CLOSE (release memory).\n\u2022 %FOUND: Returns TRUE if the last FETCH returned a row.\n\u2022 %NOTFOUND: Returns TRUE if the last FETCH failed to return a row.\n\u2022 %ROWCOUNT: Returns the cumulative number of rows fetched so far.\n\u2022 %ISOPEN: Returns TRUE if the cursor is currently open."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q5. Does Oracle support CREATE ASSERTION? What alternatives are used in Oracle?",
+    "a": "No. Oracle Database does not implement the SQL standard CREATE ASSERTION statement. Instead, single-table rules are enforced using CHECK constraints, while multi-table or aggregate business rules are enforced using Triggers (or materialized views with constraints)."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q6. List four key limitations or cautions when using Database Triggers in Oracle.",
+    "a": "\u2022 Triggers can increase overall system complexity.\n\u2022 Poorly designed triggers can degrade DML performance.\n\u2022 They fire automatically in the background, making them harder to trace and debug.\n\u2022 They should complement\u2014not completely replace\u2014application-level validations."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q7. Compare a standard Explicit Cursor loop (OPEN / FETCH / EXIT WHEN %NOTFOUND / CLOSE) with a Cursor FOR Loop.",
+    "a": "A manual explicit cursor requires declaring variables, explicitly opening the cursor, fetching row-by-row, checking %NOTFOUND, and closing the cursor to release memory. A Cursor FOR Loop automatically declares the record variable, opens the cursor, fetches every row, exits when exhausted, and closes the cursor."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q8. What is a Parameterized Cursor and why is it useful?",
+    "a": "A parameterized cursor accepts input parameters in its declaration (e.g., CURSOR emp_cursor(p_dept_id NUMBER)), allowing the same cursor definition to be reopened and reused dynamically for different filter values (such as department 20 or 30)."
+  },
+  {
+    "mod": "M9",
+    "modTitle": "Module 9: Triggers, Cursors & Assertions",
+    "q": "Q9. Explain how a BEFORE INSERT OR UPDATE trigger can emulate a multi-row ASSERTION (such as enforcing a department salary budget cap of 1,000,000).",
+    "a": "Because Oracle lacks CREATE ASSERTION, a BEFORE INSERT OR UPDATE trigger queries SUM(salary) for :NEW.dept_id, adds :NEW.salary, and calls RAISE_APPLICATION_ERROR(-20001, ...) to abort the transaction whenever the combined total exceeds 1,000,000."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q1. What is the difference between WHERE and HAVING?",
+    "a": "WHERE filters individual rows before grouping occurs and cannot contain aggregate functions. HAVING filters summarized groups after GROUP BY and aggregate functions have been computed."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q2. Why is VARCHAR2 preferred over CHAR in most cases, and when would you still choose CHAR?",
+    "a": "VARCHAR2 conserves storage by storing only the actual character length (up to 4,000 bytes), whereas CHAR pads shorter entries with trailing spaces (up to 2,000 bytes). CHAR offers slightly faster performance and is ideal for fixed-length codes such as EMP_ID CHAR(7) or GENDER CHAR(1)."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q3. What happens if you TRUNCATE a table inside a transaction and then execute ROLLBACK?",
+    "a": "Because TRUNCATE is a DDL statement, Oracle performs an implicit COMMIT before and after running it. Consequently, ROLLBACK cannot restore truncated rows."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q4. What is the difference between DELETE and TRUNCATE regarding triggers and storage space?",
+    "a": "DELETE is a DML command that removes rows individually, fires row/statement DELETE triggers, and leaves allocated space intact. TRUNCATE is a DDL command that deallocates data blocks back to the tablespace and does not fire DML row triggers."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q5. Why are INSTEAD OF triggers used in Oracle?",
+    "a": "INSTEAD OF triggers are created on views so that Oracle executes custom PL/SQL logic in place of an INSERT, UPDATE, or DELETE operation on a view that might otherwise not be directly modifiable."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q6. What is the difference between ENABLE VALIDATE and ENABLE NOVALIDATE when enabling constraints?",
+    "a": "ENABLE VALIDATE (the default) scans all existing rows in the table and fails if any row violates the constraint. ENABLE NOVALIDATE activates the constraint strictly for future INSERT/UPDATE operations without validating existing rows."
+  },
+  {
+    "mod": "INT",
+    "modTitle": "Important Exam & Interview Questions (Conceptual)",
+    "q": "Q7. Why do the following conceptual errors occur in Oracle SQL: (a) Qualifying a column inside USING(e.dept_id), (b) Using '=' with a multi-row subquery, (c) Naming a DEFAULT constraint?",
+    "a": "\u2022 (a) Oracle's USING clause requires simple unqualified column names and throws ORA-01748 if prefixed with a table alias.\n\u2022 (b) The '=' operator expects a single scalar value and raises an error when a subquery returns multiple rows (use IN or ANY instead).\n\u2022 (c) DEFAULT is a column attribute rather than a constraint object, so Oracle prohibits attaching a CONSTRAINT name to it."
+  }
+];
+let qbShowAnswers = true;
+
+function toggleAllQbAnswers() {
+  qbShowAnswers = !qbShowAnswers;
+  const btn = document.getElementById('toggle-all-ans-btn');
+  if (btn) btn.textContent = qbShowAnswers ? 'Hide All Answers' : 'Show All Answers';
+  renderQuestionBank();
+}
+
+function renderQuestionBank() {
+  const query = (document.getElementById('qb-search')?.value || '').toLowerCase();
+  const modFilter = document.getElementById('qb-mod-filter')?.value || 'ALL';
+  const filtered = QUESTION_BANK.filter(item => {
+    const matchesMod = modFilter === 'ALL' || item.mod === modFilter;
+    const matchesQuery = item.q.toLowerCase().includes(query) || item.a.toLowerCase().includes(query) || item.modTitle.toLowerCase().includes(query);
+    return matchesMod && matchesQuery;
+  });
+
+  const countLbl = document.getElementById('qb-count-label');
+  if (countLbl) countLbl.textContent = `Showing ${filtered.length} of ${QUESTION_BANK.length} questions`;
+
+  const container = document.getElementById('qb-list-container');
+  if (!container) return;
+  if (filtered.length === 0) {
+    container.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1.5rem;">No matching questions found.</p>`;
+    return;
+  }
+
+  let lastMod = '';
+  let out = '';
+  filtered.forEach(item => {
+    if (item.modTitle !== lastMod) {
+      lastMod = item.modTitle;
+      out += `<h3 style="color: var(--primary); margin: 1.35rem 0 0.7rem; padding-bottom: 0.35rem; border-bottom: 2px solid var(--border);">${item.modTitle}</h3>`;
+    }
+    out += `
+      <div class="qb-item">
+        <div class="qb-q">${item.q}</div>
+        ${qbShowAnswers ? `
+          <div><span class="ai-badge">&#10024; AI Generated Answer</span></div>
+          <div class="qb-a">${item.a}</div>
+        ` : `<div style="font-size:0.84rem; color:var(--muted); font-style:italic;">Answer hidden — click "Show All Answers" to reveal.</div>`}
+      </div>
+    `;
+  });
+  container.innerHTML = out;
+}
+
 </script>
 </body>
 </html>
